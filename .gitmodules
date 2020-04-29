@@ -1,0 +1,3 @@
+[submodule "deps/sparse_rrt-1"]
+	path = deps/sparse_rrt-1
+	url = https://github.com/LeeLinJun/sparse_rrt-1.git
