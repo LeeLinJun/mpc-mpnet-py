@@ -1,0 +1,9 @@
+**/*.npy
+**/*.pyc
+**/*-checkpoint.ipynb
+**/*.egg
+
+**/dist
+
+/mpnet/output/
+
