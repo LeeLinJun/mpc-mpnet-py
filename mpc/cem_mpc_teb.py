@@ -40,9 +40,10 @@ class MPC:
                     if self.verbose:
                         print('converged at ', ti)
                     break
-            if self.model.get_distance(x, self.params['final_goal'], self.params['weights'])< self.params['goal_radius']:
+            goal_distance = self.model.get_distance(x, self.params['final_goal'], self.params['weights'])
+            if goal_distance< self.params['goal_radius']:
 #             if self.model.get_loss(x, self.params['final_goal'], self.params['weights'])< self.params['goal_radius']:
-
+                print('reached in seg, {}'.format(goal_distance))
                 best_x = x[0].copy()
                 bestit = ti+1
                 min_loss = - np.inf

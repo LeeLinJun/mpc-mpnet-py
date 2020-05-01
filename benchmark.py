@@ -8,7 +8,7 @@ import pickle
 import time
 import click
 
-from params.step5_s1024_e32 import get_params
+from params.sst_step5_s1024_e32 import get_params
 
 def experiment(env_id, traj_id, verbose=False):
     obs_list = get_obs('acrobot_obs', env_id)
@@ -26,9 +26,9 @@ def experiment(env_id, traj_id, verbose=False):
         ref_path[-1],
         env_vox,
         system="acrobot_obs",
-#         setup="default_norm",
+        setup="default_norm",
         #setup="default_norm_aug",
-        setup="norm_nodiff_noaug_20step2e-2",
+#         setup="norm_nodiff_noaug_20step2e-2",
         ep=5000,
         obs_list=obs_list[env_id], 
         verbose=verbose)

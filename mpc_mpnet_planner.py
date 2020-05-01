@@ -180,6 +180,8 @@ class MPCMPNetPlanner:
         """
         goal_distance = self.dynamics.get_distance(self.state, self.goal[0], self.params['weights'])
 #             goal_distance = self.dynamics.get_loss(self.state, self.goal[0], self.params['weights'])
+        if goal_distance < self.params['goal_radius']:
+            self.tree_backend.add_to_tree(self.state[0].copy(), self.costs[-1])
         if self.verbose:
             print(goal_distance)
 
@@ -191,7 +193,8 @@ class MPCMPNetPlanner:
             self.costs = solution[2]
         else:
             if self.params['tree_sample']:
-                random_state = (np.random.rand(4)-0.5) * 2 * np.array([np.pi, np.pi, 6, 6])
+               
+                random_state = self.goal[0]  if np.random.rand() < 0.2 else (np.random.rand(4)-0.5) * 2 * np.array([np.pi, np.pi, 6, 6])
                 nearest = self.tree_backend.nearest_vertex(random_state.copy())
                 sample = self.sample_state(np.expand_dims(nearest, axis=0), self.goal)[0]
             else:
@@ -201,7 +204,7 @@ class MPCMPNetPlanner:
                 nearest = self.tree_backend.nearest_vertex(sample.copy())
 
 
-            self.samples.append(sample[0])
+            self.samples.append(sample)
             path_i, cost_i, success = self.steer(nearest, sample)
             if success:
                 self.tree_backend.add_to_tree(self.state[0].copy(), cost_i)
@@ -213,6 +216,7 @@ class MPCMPNetPlanner:
             self.step_linesearch()
         elif self.params['planning_mode'] == 'tree':
             self.step_tree()
+            
 #     def plan_waypoints(self):
 #         """plan if not converge, sample waypoints to form a path
            
