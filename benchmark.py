@@ -8,27 +8,30 @@ import pickle
 import time
 import click
 
-from params.sst_step5_s1024_e32 import get_params
+#from params.sst_step5_s1024_e32 import get_params
+from params.sst_step5_s1024_e32_gr2 import get_params
 
 def experiment(env_id, traj_id, verbose=False):
     obs_list = get_obs('acrobot_obs', env_id)
     data = load_data('acrobot_obs', env_id, traj_id)
     ref_path = data['path']
+    start_goal = data['start_goal']
     env_vox = torch.from_numpy(np.load('mpnet/sst_envs/acrobot_obs_env_vox.npy')[env_id]).unsqueeze(0).float()
     
     tic = time.perf_counter()
-    
+    final_start = ref_path[0]
+    final_goal = ref_path[-1]
     ## initiate planner
-    params = get_params(ref_path[-1])
+    params = get_params(final_goal)
     mpc_mpnet = MPCMPNetPlanner(
         params,
-        ref_path[0], 
-        ref_path[-1],
+        final_start, 
+        final_goal,
         env_vox,
         system="acrobot_obs",
         setup="default_norm",
         #setup="default_norm_aug",
-#         setup="norm_nodiff_noaug_20step2e-2",
+        #setup="norm_nodiff_noaug_20step2e-2",
         ep=5000,
         obs_list=obs_list[env_id], 
         verbose=verbose)
@@ -48,21 +51,22 @@ def experiment(env_id, traj_id, verbose=False):
     
     toc = time.perf_counter()
 #     print(mpc_mpnet.costs)
-    
+    costs = np.sum(mpc_mpnet.costs) if len(mpc_mpnet.costs) > 0 else np.inf
     result = {
         'env_id': env_id,
         'traj_id': traj_id,
         'planning_time': toc-tic,
         'successful': mpc_mpnet.reached,
-        'costs': np.sum(np.reshape(mpc_mpnet.costs, -1)[0]) if len(mpc_mpnet.costs) > 0 else np.inf
-             }
+        'costs': costs
+    }
     
-    print("env {}, traj {}, {}, time: {} seconds".format(
-        env_id, 
-        traj_id,
-        result['successful'],
-        result['planning_time'],
-        ))
+    print("env {}, traj {}, {}, time: {} seconds, {}(ref:{}) costs".format(
+            env_id, 
+            traj_id,
+            result['successful'],
+            result['planning_time'],
+            result['costs'],
+             data['cost'].sum()))
     return result
     
 

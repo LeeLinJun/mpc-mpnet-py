@@ -34,7 +34,7 @@ class MPCMPNetPlanner:
         
         self.dynamics = Acrobot()
         self.params = params
-        self.mpc = MPC(self.params, self.dynamics, verbose=self.verbose)
+        self.mpc = MPC(self.params, self.dynamics, verbose=self.params['mpc_verbose'])
         self.normalizer = Normalizer(self.system)
         
         self.obs_list = obs_list
@@ -182,8 +182,7 @@ class MPCMPNetPlanner:
 #             goal_distance = self.dynamics.get_loss(self.state, self.goal[0], self.params['weights'])
         if goal_distance < self.params['goal_radius']:
             self.tree_backend.add_to_tree(self.state[0].copy(), self.costs[-1])
-        if self.verbose:
-            print(goal_distance)
+        
 
         solution = self.tree_backend.get_solution()
         if solution is not None:
@@ -193,11 +192,20 @@ class MPCMPNetPlanner:
             self.costs = solution[2]
         else:
             if self.params['tree_sample']:
-               
-                random_state = self.goal[0]  if np.random.rand() < 0.2 else (np.random.rand(4)-0.5) * 2 * np.array([np.pi, np.pi, 6, 6])
-                nearest = self.tree_backend.nearest_vertex(random_state.copy())
-                sample = self.sample_state(np.expand_dims(nearest, axis=0), self.goal)[0]
+                # sst sampling mode
+                if np.random.rand() < 0.2:
+                    random_state = self.goal[0] + (np.random.rand(4)-0.5) * 2 * 0.5
+                    nearest = self.tree_backend.nearest_vertex(random_state.copy())
+                    if self.dynamics.get_distance(np.expand_dims(nearest, axis=0), self.goal[0], self.params['weights']) < 10:
+                        sample = self.goal[0] + (np.random.rand(4)-0.5) * 2 * 0.5
+                    else:
+                        sample = self.sample_state(np.expand_dims(nearest, axis=0), self.goal)[0]                        
+                else:
+                    random_state = (np.random.rand(4)-0.5) * 2 * np.array([np.pi, np.pi, 6, 6])
+                    nearest = self.tree_backend.nearest_vertex(random_state.copy())
+                    sample = self.sample_state(np.expand_dims(nearest, axis=0), self.goal)[0]
             else:
+                # smp mode
                 sample = self.sample_state(self.state, self.goal)[0]
                 self.samples.append(sample)
 
@@ -206,6 +214,10 @@ class MPCMPNetPlanner:
 
             self.samples.append(sample)
             path_i, cost_i, success = self.steer(nearest, sample)
+            
+            goal_distance = self.dynamics.get_distance(self.state, self.goal[0], self.params['weights'])
+            if self.verbose:
+                print(goal_distance)
             if success:
                 self.tree_backend.add_to_tree(self.state[0].copy(), cost_i)
                 self.path += path_i

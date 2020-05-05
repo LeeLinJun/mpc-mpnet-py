@@ -32,18 +32,20 @@ def get_params(final_goal):
         'sigma_t': np.identity(n_t)*sigma_t,
         't_min': t_min,
         't_max': t_max,
+        
+        'mpc_verbose': False,
 
         'state_dim': state_dim,
         'control_dim': control_dim,
         'converge_radius': 1e-1,
-        'drop_radius': 1,
-        'goal_radius': 10, #np.sqrt(2),
-        'max_it': 10,
+        'drop_radius': 10,
+        'goal_radius': 2, #np.sqrt(2),
+        'max_it': 5,
         'rolling_count': n_t,
         'bk_it': 2,
         'final_goal': final_goal,
         'mpc_mode': 'solve',#'mpc_mode': 'rolling'
-        'max_plan_it': 300,
+        'max_plan_it': 500,
 
 
     #     'planning_mode': 'line_search',

@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-class PNet(nn.Module): #didn't work
+class PNet(nn.Module):
 	def __init__(self, input_size, output_size):
 		super(PNet, self).__init__()
 		self.fc = nn.Sequential(

@@ -136,10 +136,10 @@ class Acrobot:
     
     def get_distance(self, state, goal, weight):
         LENGTH = 20.
-        x = np.cos(state[:, 0] - np.pi / 2)+np.cos(state[:, 0] + state[:, 1] - np.pi / 2)
-        y = np.sin(state[:, 0] - np.pi / 2)+np.sin(state[:, 0] + state[:, 1] - np.pi / 2)
-        x2 = np.cos(goal[0] - np.pi / 2)+np.cos(goal[0] + goal[1] - np.pi / 2)
-        y2 = np.sin(goal[0] - np.pi / 2)+np.sin(goal[0] + goal[1] - np.pi / 2)
-        return LENGTH*np.sqrt((x-x2)**2+(y-y2)**2)
+        x = LENGTH*(np.cos(state[:, 0] - np.pi / 2)+np.cos(state[:, 0] + state[:, 1] - np.pi / 2))
+        y = LENGTH*(np.sin(state[:, 0] - np.pi / 2)+np.sin(state[:, 0] + state[:, 1] - np.pi / 2))
+        x2 = LENGTH*(np.cos(goal[0] - np.pi / 2)+np.cos(goal[0] + goal[1] - np.pi / 2))
+        y2 = LENGTH*(np.sin(goal[0] - np.pi / 2)+np.sin(goal[0] + goal[1] - np.pi / 2))
+        return np.sqrt((x-x2)**2+(y-y2)**2)
 #         return np.sqrt(np.sum((state - goal)[:, :2] **2, axis=1))
 #         return np.max(np.abs(state-goal), axis=1)

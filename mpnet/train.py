@@ -12,7 +12,7 @@ from pathlib import Path
 
 @click.command()
 @click.option('--lr', default=1e-3, help='learning_rate')
-@click.option('--epochs', default=500, help='epochs')
+@click.option('--epochs', default=5000, help='epochs')
 @click.option('--batch', default=128, help='batch')
 @click.option('--system', default='sst_envs')
 @click.option('--model', default='acrobot_obs')
