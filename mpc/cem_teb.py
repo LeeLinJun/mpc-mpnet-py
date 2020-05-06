@@ -67,7 +67,8 @@ class CEM:
             ## iteration initialization ends
             for j in range(self.n_t):
                 if active_ind.sum() > 0:
-                    x[active_ind] = self.dynamics.propagate(x[active_ind], u[active_ind, j, :], (t[active_ind, j]/self.params['dt']).astype(int), self.params['dt'])
+                    x[active_ind] = self.dynamics.propagate(x[active_ind], u[active_ind, j, :],
+                        (t[active_ind, j]/self.params['dt']).astype(int), self.params['dt'], obs_list)
                     #x = self.dynamics.propagate(x, u[:, j, :], int(self.t/self.params['dt']), self.params['dt'])
 
                     loss[active_ind] += t[active_ind, j]

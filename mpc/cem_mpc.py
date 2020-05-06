@@ -24,7 +24,7 @@ class MPC:
             x = self.model.propagate(x.copy(),
                 np.expand_dims(best_u[ti], axis=0),
                 int(self.params['t']/self.params['dt']),
-                self.params['dt']).copy()
+                self.params['dt'], obs_list).copy()
             if obs_list is not None:
                 if not self.model.valid_state(x, obs_lists)[0]:
                     collision = True
@@ -67,7 +67,7 @@ class MPC:
             x = self.model.propagate(x.copy(),
                 np.expand_dims(best_u[0], axis=0),
                 int(self.params['t']/self.params['dt']),
-                self.params['dt']).copy()
+                self.params['dt'], obs_list).copy()
             if obs_list is not None:
                 if not self.model.valid_state(x, obs_lists)[0]:
                     collision = True

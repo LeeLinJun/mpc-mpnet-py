@@ -22,11 +22,11 @@ class Acrobot:
     g = 9.81
     obs_wh = 6
 
-    def propagate(self, start_state, control, num_steps, integration_step):
+    def propagate(self, start_state, control, num_steps, integration_step, obs_list):
         state = start_state
         num_steps_max = np.max(num_steps)
         for i in range((num_steps_max).astype(np.int)):
-            active_mask = num_steps > i
+            active_mask = np.logical_and(num_steps > i, self.valid_state(state, obs_list)) 
             state[active_mask, :] += integration_step * self._compute_derivatives(state[active_mask, :], control[active_mask, :])
             state[state[:, 0] < -np.pi, 0] += 2*np.pi
             state[state[:, 0] > np.pi, 0] -= 2*np.pi

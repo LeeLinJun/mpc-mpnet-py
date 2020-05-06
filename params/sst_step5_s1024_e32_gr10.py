@@ -32,6 +32,7 @@ def get_params(final_goal):
         'sigma_t': np.identity(n_t)*sigma_t,
         't_min': t_min,
         't_max': t_max,
+        'mpc_verbose': False,
 
         'state_dim': state_dim,
         'control_dim': control_dim,

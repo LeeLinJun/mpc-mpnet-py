@@ -3,13 +3,14 @@ from mpnet.sst_envs.utils import load_data, visualize_point, get_obs
 import pickle
 import time
 import click
-
+from tqdm import tqdm
 import sys
 sys.path.append('/media/arclabdl1/HD1/Linjun/mpc-mpnet-py/deps/sparse_rrt-1')
 
-from sparse_rrt import _sst_module
+from sparse_rrt import _deep_smp_module
 
 def experiment(env_id, traj_id, verbose=False, model='acrobot_obs'):
+    print("env {}, traj {}".format(env_id, traj_id))
     obs_list = get_obs(model, env_id)[env_id].reshape(-1, 2)
     data = load_data(model, env_id, traj_id)
     ref_path = data['path']
@@ -18,28 +19,38 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs'):
     obc = env_vox[env_id, 0]
     width = 6
     number_of_iterations = 5000
-
-    planner = _sst_module.DSSTMPCWrapper(
+    min_time_steps, max_time_steps = 1, 50
+    integration_step = 1e-2
+    planner = _deep_smp_module.DSSTMPCWrapper(
             start_state=np.array(ref_path[0]),
             goal_state=np.array(ref_path[-1]),
-            goal_radius=10,
+            goal_radius=2,
             random_seed=0,
-            sst_delta_near=1,
-            sst_delta_drain=0.5,
+            sst_delta_near=5e-1,
+            sst_delta_drain=1e-1,
             obs_list=obs_list,
             width=width,
             verbose=False
         )
+    solution = planner.get_solution()
+
     ## start experiment
     tic = time.perf_counter()
-    for iteration in range(number_of_iterations):
+    for iteration in tqdm(range(number_of_iterations)):
+        # if np.random.rand() < 0.1:
         # planner.step(min_time_steps, max_time_steps, integration_step)
+        # else:
         planner.neural_step(obc.reshape(-1))
-    #         planner.neural_step(obc.reshape(-1))
         solution = planner.get_solution()
-        if iteration % 100 == 0:
-            if solution is not None:
-                break    
+        if solution is not None:            
+            break    
+    # if solution is None: 
+    #     for iteration in range(5000):
+    #         planner.step(min_time_steps, max_time_steps, integration_step)
+    #     #         planner.neural_step(obc.reshape(-1))
+    #         solution = planner.get_solution()
+    #         if solution is not None:            
+    #                 break    
     toc = time.perf_counter()
 #     print(mpc_mpnet.costs)
     costs = solution[2].sum() if solution is not None else np.inf
@@ -51,9 +62,7 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs'):
         'costs': costs
     }
     
-    print("env {}, traj {}, {}, time: {} seconds, {}(ref:{}) costs".format(
-            env_id, 
-            traj_id,
+    print("\t{}, time: {} seconds, {}(ref:{}) costs".format(
             result['successful'],
             result['planning_time'],
             result['costs'],
@@ -84,7 +93,7 @@ def full_benchmark(num_env, num_traj, save=True, config='default'):
 @click.option('--env_id', default=0)
 @click.option('--traj_id', default=0)
 @click.option('--num_env', default=10)
-@click.option('--num_traj', default=1000)
+@click.option('--num_traj', default=100)
 @click.option('--save', default=True)
 @click.option('--config', default='ls')
 def main(full, env_id, traj_id, num_env, num_traj, save, config):

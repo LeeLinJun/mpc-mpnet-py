@@ -9,7 +9,8 @@ import time
 import click
 
 #from params.sst_step5_s1024_e32 import get_params
-from params.sst_step5_s1024_e32_gr2 import get_params
+# from params.sst_step5_s1024_e32_gr2 import get_params
+from params.sst_step5_s1024_e32_gr10 import get_params
 
 def experiment(env_id, traj_id, verbose=False):
     obs_list = get_obs('acrobot_obs', env_id)
