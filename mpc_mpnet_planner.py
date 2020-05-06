@@ -2,6 +2,8 @@ import torch
 import numpy as np
 
 from mpnet.networks.mpnet import MPNet
+from mpnet.networks.vae_mpnet import VAEMPNet
+
 from mpnet.normalizer import Normalizer
 from mpc.cem_mpc_teb import MPC
 from mpc.systems.acrobot_vec_tv import Acrobot
@@ -24,10 +26,14 @@ class MPCMPNetPlanner:
                  verbose=False,
                  distance_func=None
                 ):
+        self.setup = setup
         self.verbose = verbose
         self.system = system
-        
-        self.mpnet = MPNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=params['state_dim'])
+        if 'vae' in setup or 'VAE' in setup:
+            print('using vae_mpnet')
+            self.mpnet = VAEMPNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=params['state_dim'])
+        else:
+            self.mpnet = MPNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=params['state_dim'])
         self.mpnet.load_state_dict(torch.load('mpnet/output/{}/{}/ep{}'.format(system, setup, ep)))
         # enable dropout randomness
         self.mpnet.train()
@@ -93,7 +99,10 @@ class MPCMPNetPlanner:
         
         start_goal = torch.cat((start_th.float(), goal_th.float()), dim=1)
         with torch.no_grad():
-            sample = self.mpnet(start_goal, self.env_vox) # in normalized space
+            if 'vae' in self.setup or 'VAE' in self.setup:
+                sample = self.mpnet(start_goal, self.env_vox, self.params['vae_var']) # in normalized space
+            else:
+                sample = self.mpnet(start_goal, self.env_vox) # in normalized space
         
         sample = self.normalizer.denormalize(sample.numpy())
         return sample # in configration space
@@ -193,6 +202,7 @@ class MPCMPNetPlanner:
         else:
             if self.params['tree_sample']:
                 # sst sampling mode
+                # random gen sample around goal when getting close
                 if np.random.rand() < 0.2:
                     random_state = self.goal[0] + (np.random.rand(4)-0.5) * 2 * 0.5
                     nearest = self.tree_backend.nearest_vertex(random_state.copy())
@@ -202,6 +212,14 @@ class MPCMPNetPlanner:
                         sample = self.sample_state(np.expand_dims(nearest, axis=0), self.goal)[0]                        
                 else:
                     random_state = (np.random.rand(4)-0.5) * 2 * np.array([np.pi, np.pi, 6, 6])
+                    nearest = self.tree_backend.nearest_vertex(random_state.copy())
+                    sample = self.sample_state(np.expand_dims(nearest, axis=0), self.goal)[0]
+            elif self.params['tree_sample_v1']:
+                # sample goal with prob
+                if np.random.rand() < 0.2:
+                    sample = self.goal[0] + (np.random.rand(4)-0.5) * 2 * 0.5
+                else:
+                    random_state = self.goal[0] + (np.random.rand(4)-0.5) * 2 * 0.5
                     nearest = self.tree_backend.nearest_vertex(random_state.copy())
                     sample = self.sample_state(np.expand_dims(nearest, axis=0), self.goal)[0]
             else:

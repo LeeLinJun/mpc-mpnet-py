@@ -44,7 +44,8 @@ def path_to_tensor_forward(env_id, path_dict, normalize):
 #    data.append(np.concatenate(([env_id], start_goal[0], start_goal[-1])))
 #    gt.append(path[0, :])
     for i_start in range(n_nodes-1):
-        data.append(np.concatenate(([env_id], path[i_start, :], start_goal[-1])))
+#        data.append(np.concatenate(([env_id], path[i_start, :], start_goal[-1])))
+        data.append(np.concatenate(([env_id], path[i_start, :], path[-1, :])))
         gt.append(path[i_start+1, :])
         ## goal aug
 #         for i_goal in range(i_start+1, n_nodes):#[n_nodes-1]:#
@@ -52,8 +53,9 @@ def path_to_tensor_forward(env_id, path_dict, normalize):
 #             gt.append(path[i_start+1, :])
             
     # last path node to goal
-    data.append(np.concatenate(([env_id], path[-1, :], start_goal[-1])))
-    gt.append(start_goal[-1])
+    #data.append(np.concatenate(([env_id], path[-1, :], start_goal[-1])))
+    data.append(np.concatenate(([env_id], path[-1, :], path[-1, :])))
+    gt.append(path[-1, :])
     data = np.array(data)
     gt = np.array(gt)
     if normalize:

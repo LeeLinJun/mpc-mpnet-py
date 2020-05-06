@@ -4,12 +4,16 @@ import pickle
 import time
 import click
 from tqdm import tqdm
+from pathlib import Path
+import importlib
+
 import sys
 sys.path.append('/media/arclabdl1/HD1/Linjun/mpc-mpnet-py/deps/sparse_rrt-1')
 
 from sparse_rrt import _deep_smp_module
+# from params.cpp_dst_s32_e4 import get_params
 
-def experiment(env_id, traj_id, verbose=False, model='acrobot_obs'):
+def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_module=None):
     print("env {}, traj {}".format(env_id, traj_id))
     obs_list = get_obs(model, env_id)[env_id].reshape(-1, 2)
     data = load_data(model, env_id, traj_id)
@@ -18,19 +22,23 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs'):
     env_vox = np.load('mpnet/sst_envs/acrobot_obs_env_vox.npy')
     obc = env_vox[env_id, 0]
     width = 6
-    number_of_iterations = 5000
+    number_of_iterations = 20000
     min_time_steps, max_time_steps = 1, 50
     integration_step = 1e-2
+    params = params_module.get_params()
     planner = _deep_smp_module.DSSTMPCWrapper(
             start_state=np.array(ref_path[0]),
             goal_state=np.array(ref_path[-1]),
-            goal_radius=2,
+            goal_radius=params['goal_radius'],
             random_seed=0,
-            sst_delta_near=5e-1,
-            sst_delta_drain=1e-1,
+            sst_delta_near=params['sst_delta_near'],
+            sst_delta_drain=params['sst_delta_drain'],
             obs_list=obs_list,
-            width=width,
-            verbose=False
+            width=params['width'],
+            verbose=params['verbose'],
+            ns=params['n_sample'], nt=params['n_t'], ne=params['n_elite'], max_it=params['max_it'],
+            converge_r=params['converge_r'], mu_u=params['mu_u'], std_u=params['sigma_u'], mu_t=params['mu_t'], 
+            std_t=params['sigma_t'], t_max=params['t_max'], step_size=params['step_size'], integration_step=params['dt']
         )
     solution = planner.get_solution()
 
@@ -70,23 +78,29 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs'):
     return result
     
 
-def full_benchmark(num_env, num_traj, save=True, config='default'):
+def full_benchmark(num_env, num_traj, save=True, config='default', report=True, params_module=None):
     sr = np.zeros((num_env, num_traj))
     time = np.zeros((num_env, num_traj))
     costs = np.zeros((num_env, num_traj))
 
     for env_id in range(num_env):
         for traj_id in range(num_traj):
-            result = experiment(env_id, traj_id)
+            result = experiment(env_id, traj_id, params_module=params_module)
             sr[env_id, traj_id] = result['successful']
             if result['successful']:
                 time[env_id, traj_id] = result['planning_time']
                 costs[env_id, traj_id] = result['costs']
             if save:
+                Path("results/cpp_full/{}/".format(config)).mkdir(parents=True, exist_ok=True)
                 np.save('results/cpp_full/{}/sr_{}_{}_{}.npy'.format(config, config, num_env, num_traj), sr)
                 np.save('results/cpp_full/{}/time_{}_{}_{}.npy'.format(config, config, num_env, num_traj), time)
                 np.save('results/cpp_full/{}/costs_{}_{}_{}.npy'.format(config, config, num_env, num_traj), costs)
-
+            if report:
+                print("sr:{}\ttime:{}\tcosts:{}".format(
+                    sr.reshape(-1)[:(num_traj*env_id+traj_id+1)].mean(),
+                    time.reshape(-1)[:(num_traj*env_id+traj_id+1)].mean(),
+                    costs.reshape(-1)[:(num_traj*env_id+traj_id+1)].mean(),
+                    ))
 
 @click.command()
 @click.option('--full', default=True)
@@ -96,11 +110,13 @@ def full_benchmark(num_env, num_traj, save=True, config='default'):
 @click.option('--num_traj', default=100)
 @click.option('--save', default=True)
 @click.option('--config', default='ls')
-def main(full, env_id, traj_id, num_env, num_traj, save, config):
+@click.option('--report', default=True)
+def main(full, env_id, traj_id, num_env, num_traj, save, config, report):
+    p = importlib.import_module('.cpp_dst_{}'.format(config), package=".params")
     if not full:
         result = experiment(env_id, traj_id)
     else:
-        result = full_benchmark(num_env, num_traj, save, config)
+        result = full_benchmark(num_env, num_traj, save, config, report, p)
    
     
     
