@@ -36,6 +36,9 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
             obs_list=obs_list,
             width=params['width'],
             verbose=params['verbose'],
+            mpnet_weight_path="mpnet/exported/output/mpnet5000.pt", 
+            cost_predictor_weight_path="mpnet/exported/output/costnet5000.pt", 
+            num_sample=params['cost_samples'],
             ns=params['n_sample'], nt=params['n_t'], ne=params['n_elite'], max_it=params['max_it'],
             converge_r=params['converge_r'], mu_u=params['mu_u'], std_u=params['sigma_u'], mu_t=params['mu_t'], 
             std_t=params['sigma_t'], t_max=params['t_max'], step_size=params['step_size'], integration_step=params['dt']
@@ -46,7 +49,7 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
     tic = time.perf_counter()
     for iteration in tqdm(range(number_of_iterations)):
         if params['hybrid']:
-            if np.random.rand() < 0.1:
+            if np.random.rand() < params['hybrid_p']:
                 planner.step(min_time_steps, max_time_steps, integration_step)
             else:
                 planner.neural_step(obc.reshape(-1))
@@ -112,7 +115,7 @@ def full_benchmark(num_env, num_traj, save=True, config='default', report=True, 
 @click.option('--num_env', default=10)
 @click.option('--num_traj', default=100)
 @click.option('--save', default=True)
-@click.option('--config', default='ls')
+@click.option('--config', default='default')
 @click.option('--report', default=True)
 def main(full, env_id, traj_id, num_env, num_traj, save, config, report):
     p = importlib.import_module('.cpp_dst_{}'.format(config), package=".params")

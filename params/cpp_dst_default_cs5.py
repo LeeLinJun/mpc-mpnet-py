@@ -23,8 +23,8 @@ def get_params():
         "sst_delta_drain": 1e-1,
         "width": 6,
         "hybrid": False,
-        "hybrid_p": 0.2,
-        "cost_samples": 10,
+        "hybrid_p": 0.1,
+        "cost_samples": 5,
     }
 
     return params
