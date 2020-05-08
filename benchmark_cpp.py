@@ -23,7 +23,7 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
     obc = env_vox[env_id, 0]
     width = 6
     number_of_iterations = 20000
-    min_time_steps, max_time_steps = 1, 50
+    min_time_steps, max_time_steps = 1, 200
     integration_step = 1e-2
     params = params_module.get_params()
     planner = _deep_smp_module.DSSTMPCWrapper(
@@ -45,10 +45,13 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
     ## start experiment
     tic = time.perf_counter()
     for iteration in tqdm(range(number_of_iterations)):
-        # if np.random.rand() < 0.1:
-        # planner.step(min_time_steps, max_time_steps, integration_step)
-        # else:
-        planner.neural_step(obc.reshape(-1))
+        if params['hybrid']:
+            if np.random.rand() < 0.1:
+                planner.step(min_time_steps, max_time_steps, integration_step)
+            else:
+                planner.neural_step(obc.reshape(-1))
+        else:
+            planner.neural_step(obc.reshape(-1))
         solution = planner.get_solution()
         if solution is not None:            
             break    
@@ -92,9 +95,9 @@ def full_benchmark(num_env, num_traj, save=True, config='default', report=True, 
                 costs[env_id, traj_id] = result['costs']
             if save:
                 Path("results/cpp_full/{}/".format(config)).mkdir(parents=True, exist_ok=True)
-                np.save('results/cpp_full/{}/sr_{}_{}_{}.npy'.format(config, config, num_env, num_traj), sr)
-                np.save('results/cpp_full/{}/time_{}_{}_{}.npy'.format(config, config, num_env, num_traj), time)
-                np.save('results/cpp_full/{}/costs_{}_{}_{}.npy'.format(config, config, num_env, num_traj), costs)
+                np.save('results/cpp_full/{}/sr_{}_{}.npy'.format(config, num_env, num_traj), sr)
+                np.save('results/cpp_full/{}/time_{}_{}.npy'.format(config, num_env, num_traj), time)
+                np.save('results/cpp_full/{}/costs_{}_{}.npy'.format(config, num_env, num_traj), costs)
             if report:
                 print("sr:{}\ttime:{}\tcosts:{}".format(
                     sr.reshape(-1)[:(num_traj*env_id+traj_id+1)].mean(),
