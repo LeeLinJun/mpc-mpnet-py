@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import StepLR
 
+from .logger import Logger
 import numpy as np
 import click
 from tqdm import tqdm
@@ -22,6 +23,8 @@ def train_network(network, data_loaders, network_name="mpnet",
     if using_step_lr:
         scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
 
+    logger = Logger("output/{}/{}/{}/".format(system, setup, network_name))
+    training_iteration = 0
     with tqdm(range(epochs+1), total=epochs+1) as pbar:
         for i in range(epochs+1):
             train_loss = []
@@ -39,6 +42,8 @@ def train_network(network, data_loaders, network_name="mpnet",
                 loss = eval("torch.nn.functional."+loss_type)(output, label)
                 loss.backward()
                 optimizer.step()
+                logger.train_step(loss, training_iteration)
+                training_iteration += 1
             if using_step_lr:
                 scheduler.step(i)
             network.eval()
@@ -53,6 +58,8 @@ def train_network(network, data_loaders, network_name="mpnet",
                     output = network(inputs, envs)
                     loss = eval("torch.nn.functional."+loss_type)(output, label)
                     eval_loss.append(loss.item())
+            logger.eval_step(np.mean(eval_loss), training_iteration)
+
             pbar.set_postfix({'eval_loss': '{0:1.5f}'.format(np.mean(eval_loss))})
             if i % weight_save_epochs == 0:
                 Path("output/{}/{}/{}".format(system, setup, network_name)).mkdir(parents=True, exist_ok=True)

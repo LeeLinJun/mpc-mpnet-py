@@ -1,12 +1,12 @@
-from dataset.dataset import get_loader
+from dataset.dataset import get_loader_cost
 from networks.mpnet import MPNet
-
+from networks.costnet import CostNet
 import torch
 
 import numpy as np
 import click
 
-from training_utils.train import train_network
+from training_utils.trainer import train_network
  
 @click.command()
 @click.option('--ae_output_size', default=1024, help='ae_output_size')
@@ -18,20 +18,21 @@ from training_utils.train import train_network
 @click.option('--system', default='acrobot_obs')
 @click.option('--setup', default='default_norm')
 @click.option('--loss_type', default='l1_loss')
+@click.option('--load_from', default='mpnet')
+@click.option('--network_type', default='cost_to_go')
 def main(ae_output_size, state_size, lr, epochs, batch, 
-    system_env, system, setup, loss_type):
-    
+    system_env, system, setup, loss_type, load_from, network_type):
     mpnet = MPNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4)
-    mpnet.load_state_dict(torch.load('output/acrobot_obs/{}/ep5000'.format(setup)))
-    
+    mpnet.load_state_dict(torch.load('output/acrobot_obs/{}/{}/ep10000.pth'.format(setup,load_from)))
     
     costnet = CostNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4, encoder=mpnet.encoder)
     for param in costnet.encoder.parameters():
         param.requires_grad = False
 
-    data_loaders = get_loader(system_env, system, batch_size=batch, setup=setup)
+    data_loaders = get_loader_cost(system_env, system, batch_size=batch, setup=setup, network_type=network_type)
 
-    train_network(network=costnet, data_loaders=data_loaders, network_name="mpnet",
+    train_network(network=costnet, data_loaders=data_loaders, 
+            network_name=network_type,
         lr=lr, epochs=epochs, batch=batch, 
         system_env=system_env, system=system, setup=setup,
         using_step_lr=True, step_size=50, gamma=0.9,
@@ -39,4 +40,4 @@ def main(ae_output_size, state_size, lr, epochs, batch,
 
 
 if __name__ == "__main__":
-    train()
+    main()
