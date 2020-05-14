@@ -3,9 +3,8 @@ import numpy as np
 import click
 
 from export import export
-
 from networks.mpnet import MPNet
-from dataset.dataset import get_loader
+from networks.costnet import CostNet 
 
 @click.command()
 @click.option('--system', default='sst_envs')
@@ -19,15 +18,9 @@ def main(system, model, setup, ep):
         ae_output_size=1024, 
         in_channels=1, 
         state_size=state_size[model]).cuda()
-    mpnet.load_state_dict(torch.load('output/{}/{}/mpnet/ep{}.pth'.format(model, setup, ep)))
-    mpnet.train()
-    export(mpnet, setup=setup, system=system, model=model, exported_path="exported/output/mpnet_10k.pt")
-
-    
-    # for env_id in range(10):
-    #     i_th_env = env_vox[env_id].unsqueeze(0)
-    #     # print(i_th_env.shape)
-    #     torch.save(i_th_env, 'cpp/output/env_vox_{}.pt'.format())
-
+    costnet = CostNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4, encoder=mpnet.encoder).cuda()
+    costnet.load_state_dict(torch.load('output/{}/{}/cost_to_go/ep{}.pth'.format(model, setup, ep)))
+    costnet.eval()
+    export(costnet, setup=setup, system=system, model=model, exported_path="exported/output/cost_to_go_10k.pt")
 if __name__ == '__main__':
     main()

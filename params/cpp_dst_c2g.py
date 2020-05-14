@@ -6,7 +6,7 @@ def get_params():
         'n_sample': 32,
         'n_elite': 4,
         'n_t': 3,
-        'max_it': 5,
+        'max_it': 10,
         'converge_r': 1e-1,
 
         'dt': 2e-2,
@@ -24,7 +24,7 @@ def get_params():
         "width": 6,
         "hybrid": False,
         "hybrid_p": 0.2,
-        "cost_samples": 1,
+        "cost_samples": 10,
         "mpnet_weight_path":"mpnet/exported/output/mpnet_10k.pt",
         "cost_predictor_weight_path": "mpnet/exported/output/cost_to_go_10k.pt",
         "refine": False,

@@ -36,12 +36,13 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
             obs_list=obs_list,
             width=params['width'],
             verbose=params['verbose'],
-            mpnet_weight_path="mpnet/exported/output/mpnet5000.pt", 
-            cost_predictor_weight_path="mpnet/exported/output/costnet5000.pt", 
+            mpnet_weight_path=params['mpnet_weight_path'], 
+            cost_predictor_weight_path=params['cost_predictor_weight_path'], 
             num_sample=params['cost_samples'],
             ns=params['n_sample'], nt=params['n_t'], ne=params['n_elite'], max_it=params['max_it'],
             converge_r=params['converge_r'], mu_u=params['mu_u'], std_u=params['sigma_u'], mu_t=params['mu_t'], 
-            std_t=params['sigma_t'], t_max=params['t_max'], step_size=params['step_size'], integration_step=params['dt']
+            std_t=params['sigma_t'], t_max=params['t_max'], step_size=params['step_size'], integration_step=params['dt'], 
+            device_id="cuda:1", refine_lr=params['refine_lr']
         )
     solution = planner.get_solution()
 
@@ -52,19 +53,12 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
             if np.random.rand() < params['hybrid_p']:
                 planner.step(min_time_steps, max_time_steps, integration_step)
             else:
-                planner.neural_step(obc.reshape(-1))
+                planner.neural_step(obc.reshape(-1), params['refine'])
         else:
-            planner.neural_step(obc.reshape(-1))
+            planner.neural_step(obc.reshape(-1), params['refine'])
         solution = planner.get_solution()
         if solution is not None:            
             break    
-    # if solution is None: 
-    #     for iteration in range(5000):
-    #         planner.step(min_time_steps, max_time_steps, integration_step)
-    #     #         planner.neural_step(obc.reshape(-1))
-    #         solution = planner.get_solution()
-    #         if solution is not None:            
-    #                 break    
     toc = time.perf_counter()
 #     print(mpc_mpnet.costs)
     costs = solution[2].sum() if solution is not None else np.inf
