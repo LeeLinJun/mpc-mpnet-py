@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import pickle
+import click
 
 
 def pcd_to_voxel2d(points, voxel_size=(24, 24), padding_size=(32, 32)):
@@ -66,17 +67,19 @@ def voxelize2d(points, voxel_size=(24, 24), padding_size=(32, 32), resolution=0.
     #return voxels, inside_box_points
 
 
-def main(env_num=10, model="acrobot_obs"):
-    def filepath (model, env_id, filetype):
-        return "/media/arclabdl1/HD1/Linjun/data/kinodynamic/{model}/{filetype}_{env_id}.pkl".format(model=model, env_id=env_id, filetype=filetype)
-    def loader(model, env_id, filetype): 
-        return pickle.load(open(filepath(model, env_id, filetype), "rb"))
+@click.command()
+@click.option('--system', default='acrobot_obs')
+def main(env_num=10, system="acrobot_obs"):
+    def filepath (system, env_id, filetype):
+        return "/media/arclabdl1/HD1/Linjun/data/kinodynamic/{system}/{filetype}_{env_id}.pkl".format(system=system, env_id=env_id, filetype=filetype)
+    def loader(system, env_id, filetype): 
+        return pickle.load(open(filepath(system, env_id, filetype), "rb"))
     
     obs_list = []
-    #obs_list = [loader(model, env_id, "obs") for env_id in range(10)]
-    obc_list = np.array([loader(model, env_id, "obc").reshape(-1, 2) for env_id in range(10)])
+    #obs_list = [loader(system, env_id, "obs") for env_id in range(10)]
+    obc_list = np.array([loader(system, env_id, "obc").reshape(-1, 2) for env_id in range(10)])
     obs_vox = pcd_to_voxel2d(obc_list, voxel_size=[32,32]).reshape(-1,1,32,32)
-    np.save("{}_env_vox.npy".format(model), obs_vox)
+    np.save("{}_env_vox.npy".format(system), obs_vox)
 
 if __name__ == '__main__':
     main()

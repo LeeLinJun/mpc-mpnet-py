@@ -3,7 +3,7 @@ import numpy as np
 def get_params():
     # params from cpp_dst_gr2_n1_d0_1_s32_e4_step3.py
     params = {
-        'n_sample': 32,
+        'n_sample': 128,
         'n_elite': 4,
         'n_t': 3,
         'max_it': 5,
@@ -31,10 +31,10 @@ def get_params():
         "cost_to_go_predictor_weight_path": "mpnet/exported/output/cost_to_go_10k.pt",
 
         "refine": False,
-        "using_one_step_cost": True,
-        "refine_lr": 0,
-        "refine_threshold": 0,
-        "device_id": "cuda:3",
+        "using_one_step_cost": False,
+        "refine_lr": 2e-2,
+        "refine_threshold": 10,
+        "device_id": "cuda:1",
 
         "cost_reselection": False,
     }

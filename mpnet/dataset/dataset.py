@@ -23,9 +23,9 @@ def get_loader(system, model, batch_size=128, setup='default'):
     test_loader = np_to_loader(path_data, gt, test_ind, batch_size, False)
     return train_loader, test_loader
 
-def get_loader_cost(system, model, batch_size=128, setup='default', network_type="cost_to_go"):
-    path_data = np.load('{system}/{setup}/{model}_path_data.npy'.format(system=system, setup=setup, model=model))
-    gt = np.load('{system}/{setup}/{model}_{network_type}.npy'.format(system=system, setup=setup, model=model, network_type=network_type))
+def get_loader_cost(system, model, batch_size=128, setup='default', label_type="cost", data_type="path_data"):
+    path_data = np.load('{system}/{setup}/{model}_{data_type}.npy'.format(system=system, setup=setup, model=model, data_type=data_type))
+    gt = np.load('{system}/{setup}/{model}_{label_type}.npy'.format(system=system, setup=setup, model=model, label_type=label_type))
     gt = np.expand_dims(gt, axis=1)
     # env_vox = np.load('env_vox.npy')
     # env_data = env_vox[path_data[:, 0].astype(int)]
@@ -38,5 +38,6 @@ def get_loader_cost(system, model, batch_size=128, setup='default', network_type
     train_loader = np_to_loader(path_data, gt, train_ind, batch_size, True)
     test_loader = np_to_loader(path_data, gt, test_ind, batch_size, False)
     return train_loader, test_loader
+
 if __name__ == '__main__':
     train_loader, test_loader = get_loader()

@@ -19,7 +19,7 @@ def main(system, model, setup, ep):
         in_channels=1, 
         state_size=state_size[model]).cuda()
     costnet = CostNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4, encoder=mpnet.encoder).cuda()
-    costnet.load_state_dict(torch.load('output/{}/{}/cost/ep{}.pth'.format(model, setup, ep)))
+    costnet.load_state_dict(torch.load('output/{}/{}/cost_transit/ep{}.pth'.format(model, setup, ep)))
     costnet.eval()
     export(costnet, setup=setup, system=system, model=model, exported_path="exported/output/cost_10k.pt")
 if __name__ == '__main__':

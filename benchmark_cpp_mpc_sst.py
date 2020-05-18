@@ -22,7 +22,7 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
     env_vox = np.load('mpnet/sst_envs/acrobot_obs_env_vox.npy')
     obc = env_vox[env_id, 0]
     width = 6
-    number_of_iterations = 20000
+    number_of_iterations = 60000
     min_time_steps, max_time_steps = 1, 200
     integration_step = 1e-2
     params = params_module.get_params()
@@ -50,21 +50,10 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
     ## start experiment
     tic = time.perf_counter()
     for iteration in tqdm(range(number_of_iterations)):
-        if params['hybrid']:
-            if np.random.rand() < params['hybrid_p']:
-                planner.step(min_time_steps, max_time_steps, integration_step)
-            else:
-                planner.neural_step(obc.reshape(-1), params['refine'], 
-                    refine_threshold=params['refine_threshold'],
-                    using_one_step_cost=params['using_one_step_cost'],
-                    cost_reselection=params['cost_reselection'])
-        else:
-            planner.neural_step(obc.reshape(-1), params['refine'], 
-                    refine_threshold=params['refine_threshold'],
-                    using_one_step_cost=params['using_one_step_cost'],
-                    cost_reselection=params['cost_reselection'])
+        planner.mpc_step(integration_step)
+        # planner.step(min_time_steps, max_time_steps, integration_step)
         solution = planner.get_solution()
-        if solution is not None:            
+        if solution is not None and solution[2].sum() < data['cost'].sum() * 1.2:            
             break    
     toc = time.perf_counter()
 #     print(mpc_mpnet.costs)
@@ -98,10 +87,10 @@ def full_benchmark(num_env, num_traj, save=True, config='default', report=True, 
                 time[env_id, traj_id] = result['planning_time']
                 costs[env_id, traj_id] = result['costs']
             if save:
-                Path("results/cpp_full/{}/".format(config)).mkdir(parents=True, exist_ok=True)
-                np.save('results/cpp_full/{}/sr_{}_{}.npy'.format(config, num_env, num_traj), sr)
-                np.save('results/cpp_full/{}/time_{}_{}.npy'.format(config, num_env, num_traj), time)
-                np.save('results/cpp_full/{}/costs_{}_{}.npy'.format(config, num_env, num_traj), costs)
+                Path("results/cpp_mpc_full/{}/".format(config)).mkdir(parents=True, exist_ok=True)
+                np.save('results/cpp_mpc_full/{}/sr_{}_{}.npy'.format(config, num_env, num_traj), sr)
+                np.save('results/cpp_mpc_full/{}/time_{}_{}.npy'.format(config, num_env, num_traj), time)
+                np.save('results/cpp_mpc_full/{}/costs_{}_{}.npy'.format(config, num_env, num_traj), costs)
             if report:
                 print("sr:{}\ttime:{}\tcosts:{}".format(
                     sr.reshape(-1)[:(num_traj*env_id+traj_id+1)].mean(),
@@ -119,7 +108,7 @@ def full_benchmark(num_env, num_traj, save=True, config='default', report=True, 
 @click.option('--config', default='default')
 @click.option('--report', default=True)
 def main(full, env_id, traj_id, num_env, num_traj, save, config, report):
-    p = importlib.import_module('.cpp_dst_{}'.format(config), package=".params")
+    p = importlib.import_module('.cpp_mpc_{}'.format(config), package=".params")
     if not full:
         result = experiment(env_id, traj_id)
     else:

@@ -31,10 +31,10 @@ def get_params():
         "cost_to_go_predictor_weight_path": "mpnet/exported/output/cost_to_go_10k.pt",
 
         "refine": False,
-        "using_one_step_cost": True,
-        "refine_lr": 0,
-        "refine_threshold": 0,
-        "device_id": "cuda:3",
+        "using_one_step_cost": False,
+        "refine_lr": 2e-2,
+        "refine_threshold": 10,
+        "device_id": "cuda:1",
 
         "cost_reselection": False,
     }

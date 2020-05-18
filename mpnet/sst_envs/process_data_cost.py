@@ -36,7 +36,7 @@ def interpolate_path(path_dict, dynamics=Acrobot(), interval_steps=20, step_size
     #print(waypoints) 
     return waypoints, costs_sofar, costs2go
 
-def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=True):
+def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=True, system="acrobot_obs"):
     """
     [env_id, state, goal]
     """    
@@ -59,11 +59,13 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=True):
     c2g = []
     csf = []
     c = []
+    transit_pair_data = []
     # start to first path node
 #    data.append(np.concatenate(([env_id], start_goal[0], start_goal[-1])))
 #    gt.append(path[0, :])
     for i_start in range(n_nodes-1):
         data.append(np.concatenate(([env_id], path[i_start, :], start_goal[-1])))
+        transit_pair_data.append(np.concatenate(([env_id], path[i_start, :], path[i_start+1, :])))
         gt.append(path[i_start+1, :])
         c2g.append(costs2go[i_start])
         csf.append(costs_sofar[i_start])
@@ -82,12 +84,26 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=True):
     c2g = np.array(c2g)
     csf = np.array(csf)
     c = np.array(c)
+    transit_pair_data = np.array(transit_pair_data)
     if normalize:
-        data[:, [1,2,5,6]] /= np.pi
-        data[:, [3,4,7,8]] /= 6
-        gt[:, [0,1]] /= np.pi
-        gt[:, [2,3]] /= 6
-    return data, gt, c2g, csf, c
+        if system == "acrobot_obs":
+            data[:, [1,2,5,6]] /= np.pi
+            data[:, [3,4,7,8]] /= 6
+            gt[:, [0,1]] /= np.pi
+            gt[:, [2,3]] /= 6
+        elif system == "cartpole_obs":
+            data[:, [1,5]] /= 30
+            data[:, [2,6]] /= 40
+            data[:, [3,7]] /= np.pi
+            data[:, [4,8]] /= 2
+
+            gt[:, [1,5]] /= 30
+            gt[:, [2,6]] /= 40
+            gt[:, [3,7]] /= np.pi
+            gt[:, [4,8]] /= 2
+        else:
+            raise NotImplementedError("unkown dynamics")
+    return data, gt, c2g, csf, c, transit_pair_data
 
 
 @click.command()
@@ -99,16 +115,18 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=True):
 @click.option('--interpolate', default=False)
 def main(num, system, traj_num, setup, normalize, interpolate):
     data, gt, cost_to_go, cost_so_far, cost = [], [], [], [], []
+    transit_pair_data = []
     for env_id in range(num):
         for traj_id  in range(traj_num):
             # try:
             path_dict = load_data(system, env_id, traj_id)
-            d, g, c2g, csf, c = path_to_tensor_forward(env_id, path_dict, normalize, interpolate=interpolate)
+            d, g, c2g, csf, c, tp_d = path_to_tensor_forward(env_id, path_dict, normalize, interpolate=interpolate)
             data.append(d)
             gt.append(g)
             cost_to_go.append(c2g)
             cost_so_far.append(csf)
             cost.append(c)
+            transit_pair_data.append(tp_d)
             if traj_id % 50 == 0:
                 print(env_id, traj_id)
     data = np.concatenate(data, axis=0)
@@ -116,13 +134,15 @@ def main(num, system, traj_num, setup, normalize, interpolate):
     cost_to_go = np.concatenate(cost_to_go, axis=0)
     cost_so_far = np.concatenate(cost_so_far, axis=0)
     cost = np.concatenate(cost, axis=0)
-    print(data.shape, gt.shape, cost_to_go.shape, cost_so_far.shape)
+    transit_pair_data = np.concatenate(transit_pair_data, axis=0)
+    print(data.shape, gt.shape, cost_to_go.shape, cost_so_far.shape, transit_pair_data.shape)
 
     np.save('{}/{}_path_data.npy'.format(setup, system), data)
     np.save('{}/{}_gt.npy'.format(setup, system), gt)
     np.save('{}/{}_cost_to_go.npy'.format(setup, system), cost_to_go)
     np.save('{}/{}_cost_so_far.npy'.format(setup, system), cost_so_far)
     np.save('{}/{}_cost.npy'.format(setup, system), cost)
+    np.save('{}/{}_transit_pair_data.npy'.format(setup, system), transit_pair_data)
 
 
 
