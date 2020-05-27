@@ -1,5 +1,5 @@
 import numpy as np
-from mpnet.sst_envs.utils import load_data, visualize_point, get_obs
+from mpnet.sst_envs.utils import load_data, get_obs
 import pickle
 import time
 import click
@@ -23,6 +23,7 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
     obc = env_vox[env_id, 0]
     width = 6
     number_of_iterations = 60000
+    number_of_refine = 120000
     min_time_steps, max_time_steps = 1, 200
     integration_step = 1e-2
     params = params_module.get_params()
@@ -53,8 +54,16 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
         planner.mpc_step(integration_step)
         # planner.step(min_time_steps, max_time_steps, integration_step)
         solution = planner.get_solution()
-        if solution is not None and solution[2].sum() < data['cost'].sum() * 1.2:            
-            break    
+        if solution is not None:            
+            break
+    for iteration in tqdm(range(number_of_refine)):
+        solution = planner.get_solution()
+        # if iteration % 1000 == 0:
+        #     print(solution[2].sum(), data['cost'].sum() )
+        if solution[2].sum() < data['cost'].sum() * 1.2:
+            break
+        else:
+            planner.step(min_time_steps, max_time_steps, integration_step)
     toc = time.perf_counter()
 #     print(mpc_mpnet.costs)
     costs = solution[2].sum() if solution is not None else np.inf

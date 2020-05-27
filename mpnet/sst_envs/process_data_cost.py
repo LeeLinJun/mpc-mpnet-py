@@ -36,7 +36,7 @@ def interpolate_path(path_dict, dynamics=Acrobot(), interval_steps=20, step_size
     #print(waypoints) 
     return waypoints, costs_sofar, costs2go
 
-def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=True, system="acrobot_obs"):
+def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=False, system="acrobot_obs"):
     """
     [env_id, state, goal]
     """    
@@ -92,15 +92,20 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=True, syste
             gt[:, [0,1]] /= np.pi
             gt[:, [2,3]] /= 6
         elif system == "cartpole_obs":
-            data[:, [1,5]] /= 30
-            data[:, [2,6]] /= 40
-            data[:, [3,7]] /= np.pi
-            data[:, [4,8]] /= 2
+            data[:, 1] /= 30
+            data[:, 2] /= 40
+            data[:, 3] /= np.pi
+            data[:, 4] /= 2
+            data[:, 5] /= 30
+            data[:, 6] /= 40
+            data[:, 7] /= np.pi
+            data[:, 8] /= 2
 
-            gt[:, [1,5]] /= 30
-            gt[:, [2,6]] /= 40
-            gt[:, [3,7]] /= np.pi
-            gt[:, [4,8]] /= 2
+            gt[:, 0] /= 30
+            gt[:, 1] /= 40
+            gt[:, 2] /= np.pi
+            gt[:, 3] /= 2
+            
         else:
             raise NotImplementedError("unkown dynamics")
     return data, gt, c2g, csf, c, transit_pair_data
@@ -108,7 +113,7 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=True, syste
 
 @click.command()
 @click.option('--num', default=10)
-@click.option('--system', default='acrobot_obs')
+@click.option('--system', default='cartpole_obs')
 @click.option('--traj_num', default=1000)
 @click.option('--setup', default='default_norm')
 @click.option('--normalize', default=True)
@@ -120,7 +125,7 @@ def main(num, system, traj_num, setup, normalize, interpolate):
         for traj_id  in range(traj_num):
             # try:
             path_dict = load_data(system, env_id, traj_id)
-            d, g, c2g, csf, c, tp_d = path_to_tensor_forward(env_id, path_dict, normalize, interpolate=interpolate)
+            d, g, c2g, csf, c, tp_d = path_to_tensor_forward(env_id, path_dict, normalize, interpolate=interpolate, system=system)
             data.append(d)
             gt.append(g)
             cost_to_go.append(c2g)

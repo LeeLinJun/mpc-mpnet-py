@@ -12,7 +12,7 @@ from training_utils.trainer import train_network
 @click.option('--ae_output_size', default=1024, help='ae_output_size')
 @click.option('--state_size', default=4, help='')
 @click.option('--lr', default=1e-3, help='learning_rate')
-@click.option('--epochs', default=5000, help='epochs')
+@click.option('--epochs', default=10000, help='epochs')
 @click.option('--batch', default=128, help='batch')
 @click.option('--system_env', default='sst_envs')
 @click.option('--system', default='acrobot_obs')

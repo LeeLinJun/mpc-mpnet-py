@@ -22,12 +22,12 @@ def train_network(network, data_loaders, network_name="mpnet",
     optimizer = torch.optim.Adam(network.parameters(), lr=lr)
     if using_step_lr:
         scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
-
+    eval_loss = 0
+    train_loss = 0
     logger = Logger("output/{}/{}/{}/".format(system, setup, network_name))
-    training_iteration = 0
     with tqdm(range(epochs+1), total=epochs+1) as pbar:
         for i in range(epochs+1):
-            train_loss = []
+            train_loss_list = []
             network.train()
             for data, label in train_loader:
                 ## prepare data
@@ -41,14 +41,16 @@ def train_network(network, data_loaders, network_name="mpnet",
                 output = network(inputs, envs)
                 loss = eval("torch.nn.functional."+loss_type)(output, label)
                 loss.backward()
+                train_loss_list.append(loss.item())
                 optimizer.step()
-                logger.train_step(loss, training_iteration)
-                training_iteration += 1
+            train_loss = np.mean(train_loss_list)
+            
+            logger.train_step(loss, i)
             if using_step_lr:
                 scheduler.step(i)
             network.eval()
             for data, label in test_loader:
-                eval_loss = []
+                eval_loss_list = []
                 with torch.no_grad():
                     if torch.cuda.is_available():
                         data = data.cuda()
@@ -57,10 +59,13 @@ def train_network(network, data_loaders, network_name="mpnet",
                     envs = env_vox[(data[:,0]).long()]
                     output = network(inputs, envs)
                     loss = eval("torch.nn.functional."+loss_type)(output, label)
-                    eval_loss.append(loss.item())
-            logger.eval_step(np.mean(eval_loss), training_iteration)
+                    eval_loss_list.append(loss.item())
+            eval_loss = np.mean(eval_loss_list)
+            pbar.set_postfix({'eval_loss': '{0:1.5f}'.format(eval_loss),
+                              'train_loss': '{0:1.5f}'.format(train_loss),})
+            logger.eval_step(eval_loss, i)
 
-            pbar.set_postfix({'eval_loss': '{0:1.5f}'.format(np.mean(eval_loss))})
+           
             if i % weight_save_epochs == 0:
                 Path("output/{}/{}/{}".format(system, setup, network_name)).mkdir(parents=True, exist_ok=True)
                 torch.save(network.state_dict(), "output/{}/{}/{}/ep{}.pth".format(system, setup, network_name, i))

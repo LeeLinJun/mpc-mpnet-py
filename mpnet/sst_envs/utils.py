@@ -7,7 +7,7 @@ def load_data(model, env, traj_id):
     keys = ["control", "path", "start_goal", "time", 'cost']
     return dict(zip(keys, [load_pkl(key) for key in keys]))
  
-def visualize_point(state):
+def acrobot_visualize_point(state):
     STATE_THETA_1, STATE_THETA_2, STATE_V_1, STATE_V_2 = 0, 1, 2, 3
     MIN_V_1, MAX_V_1 = -6., 6.
     MIN_V_2, MAX_V_2 = -6., 6.
@@ -18,6 +18,13 @@ def visualize_point(state):
     y1 = LENGTH * np.sin(state[STATE_THETA_1] - np.pi / 2) 
     y2 = y1 + LENGTH * np.sin(state[STATE_THETA_1] + state[STATE_THETA_2] - np.pi / 2)
     return x1, y1, x2, y2
+
+def cartpole_visualize_point(state):
+    H = 0.5
+    L = 2.5
+    x2 = state[0] + (L) * np.sin(state[2])
+    y2 = -(L) * np.cos(state[2])
+    return state[0], H, x2, y2
 
 def get_obs(model, filetype):
     def filepath (model, env_id, filetype):

@@ -29,8 +29,8 @@ def main(ae_output_size, state_size, lr, epochs, batch,
     mpnet.load_state_dict(torch.load('output/acrobot_obs/{}/{}/ep10000.pth'.format(setup,load_from)))
     
     costnet = CostNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4, encoder=mpnet.encoder)
-    for param in costnet.encoder.parameters():
-        param.requires_grad = False
+    # for param in costnet.encoder.parameters():
+    #     param.requires_grad = False
 
     data_loaders = get_loader_cost(system_env, system, batch_size=batch, setup=setup, label_type=label_type, data_type=data_type)
 
