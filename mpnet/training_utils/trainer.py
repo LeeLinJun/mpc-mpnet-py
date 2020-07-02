@@ -10,10 +10,11 @@ from pathlib import Path
 import importlib
 
 def train_network(network, data_loaders, network_name="mpnet",
-    lr=1e-3, epochs=5000, batch=128, 
+    lr=3e-4, epochs=1000, batch=128, 
     system_env="sst_envs", system="acrobot_obs", setup="default_norm",
-    using_step_lr=True, step_size=50, gamma=0.9,
-    loss_type="l1_loss", weight_save_epochs=50):
+    using_step_lr=True, step_size=100, gamma=0.9,
+    loss_type="l1_loss", weight_save_epochs=25,
+    add_noise=False):
     train_loader, test_loader = data_loaders
     env_vox = torch.from_numpy(np.load('{}/{}_env_vox.npy'.format(system_env, system))).float()
     if torch.cuda.is_available():
@@ -25,29 +26,40 @@ def train_network(network, data_loaders, network_name="mpnet",
     eval_loss = 0
     train_loss = 0
     logger = Logger("output/{}/{}/{}/".format(system, setup, network_name))
+
+    get_loss = lambda output, label:eval("torch.nn.functional."+loss_type)(output, label)
+    loss_coeff = np.array([15, 20., 15.7, 2.])
+    loss_coeff /= np.sum(loss_coeff)
+    
     with tqdm(range(epochs+1), total=epochs+1) as pbar:
-        for i in range(epochs+1):
+        for ep in range(epochs+1):
             train_loss_list = []
             network.train()
             for data, label in train_loader:
                 ## prepare data
-                if torch.cuda.is_available():
-                    data = data.cuda()
-                    label = label.cuda()
                 inputs = data[:,1:]
+                if add_noise:
+                    inputs += torch.empty(inputs.size(0), inputs.size(1)).uniform_(-1, 1) * torch.tensor([1e-2, 1e-2, 1e-1, 1e-1, 0, 0, 0, 0])
+                if torch.cuda.is_available():
+                    inputs = inputs.cuda()
+                    label = label.cuda()        
                 envs = env_vox[(data[:, 0]).long()]
                 ## execute
                 optimizer.zero_grad()
                 output = network(inputs, envs)
-                loss = eval("torch.nn.functional."+loss_type)(output, label)
+
+                loss_tensor = torch.zeros(label.size(1))
+                for dim_i in range(label.size(1)):
+                    loss_tensor[dim_i] = get_loss(output[:, dim_i], label[:, dim_i]) * loss_coeff[dim_i]
+                loss = torch.sum(loss_tensor)
                 loss.backward()
                 train_loss_list.append(loss.item())
                 optimizer.step()
             train_loss = np.mean(train_loss_list)
             
-            logger.train_step(loss, i)
+            logger.train_step(loss, ep)
             if using_step_lr:
-                scheduler.step(i)
+                scheduler.step(ep)
             network.eval()
             for data, label in test_loader:
                 eval_loss_list = []
@@ -58,15 +70,17 @@ def train_network(network, data_loaders, network_name="mpnet",
                     inputs = data[:,1:]
                     envs = env_vox[(data[:,0]).long()]
                     output = network(inputs, envs)
-                    loss = eval("torch.nn.functional."+loss_type)(output, label)
+                    loss_tensor = torch.zeros(label.size(1))
+                    for dim_i in range(label.size(1)):
+                        loss_tensor[dim_i] = get_loss(output[:, dim_i], label[:, dim_i]) * loss_coeff[dim_i]
+                    loss = torch.sum(loss_tensor)
                     eval_loss_list.append(loss.item())
             eval_loss = np.mean(eval_loss_list)
             pbar.set_postfix({'eval_loss': '{0:1.5f}'.format(eval_loss),
                               'train_loss': '{0:1.5f}'.format(train_loss),})
-            logger.eval_step(eval_loss, i)
+            logger.eval_step(eval_loss, ep)
 
-           
-            if i % weight_save_epochs == 0:
+            if ep % weight_save_epochs == 0:
                 Path("output/{}/{}/{}".format(system, setup, network_name)).mkdir(parents=True, exist_ok=True)
-                torch.save(network.state_dict(), "output/{}/{}/{}/ep{}.pth".format(system, setup, network_name, i))
+                torch.save(network.state_dict(), "output/{}/{}/{}/ep{}.pth".format(system, setup, network_name, ep))
             pbar.update(1)

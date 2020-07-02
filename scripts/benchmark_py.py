@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from mpc_mpnet_planner import MPCMPNetPlanner
 # from matplotlib import pyplot as plt
-from mpnet.sst_envs.utils import load_data, visualize_point, get_obs
+from mpnet.sst_envs.utils import load_data, get_obs
 import pickle
 
 import time

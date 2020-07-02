@@ -69,7 +69,8 @@ def voxelize2d(points, voxel_size=(24, 24), padding_size=(32, 32), resolution=0.
 
 @click.command()
 @click.option('--system', default='acrobot_obs')
-def main(env_num=10, system="acrobot_obs"):
+def main(system="acrobot_obs"):
+    print("Processing {} env".format(system))
     def filepath (system, env_id, filetype):
         return "/media/arclabdl1/HD1/Linjun/data/kinodynamic/{system}/{filetype}_{env_id}.pkl".format(system=system, env_id=env_id, filetype=filetype)
     def loader(system, env_id, filetype): 
@@ -78,7 +79,8 @@ def main(env_num=10, system="acrobot_obs"):
     obs_list = []
     #obs_list = [loader(system, env_id, "obs") for env_id in range(10)]
     obc_list = np.array([loader(system, env_id, "obc").reshape(-1, 2) for env_id in range(10)])
-    obs_vox = pcd_to_voxel2d(obc_list, voxel_size=[32,32]).reshape(-1,1,32,32)
+    obs_vox = pcd_to_voxel2d(obc_list, voxel_size=[32, 32]).reshape(-1, 1, 32, 32)
+    print("Saving {}_env_vox.npy with dim {}".format(system, obs_vox.shape))
     np.save("{}_env_vox.npy".format(system), obs_vox)
 
 if __name__ == '__main__':

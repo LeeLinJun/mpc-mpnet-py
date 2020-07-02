@@ -6,7 +6,7 @@ def get_params():
         'n_sample': 32,
         'n_elite': 4,
         'n_t': 3,
-        'max_it': 10,
+        'max_it': 5,
         'converge_r': 1e-1,
 
         'dt': 2e-2,
@@ -23,12 +23,20 @@ def get_params():
         "sst_delta_drain": 1e-1,
         "width": 6,
         "hybrid": False,
-        "hybrid_p": 0.2,
+        "hybrid_p": 0.,
         "cost_samples": 10,
         "mpnet_weight_path":"mpnet/exported/output/mpnet_10k.pt",
-        "cost_predictor_weight_path": "mpnet/exported/output/cost_to_go_10k.pt",
+    
+        "cost_predictor_weight_path": "mpnet/exported/output/cost_10k.pt",
+        "cost_to_go_predictor_weight_path": "mpnet/exported/output/cost_to_go_10k.pt",
+
         "refine": False,
-        "refine_lr": 5e-2
+        "using_one_step_cost": False,
+        "refine_lr": 0,
+        "refine_threshold": 0,
+        "device_id": "cuda:3",
+
+        "cost_reselection": False,
     }
 
     return params

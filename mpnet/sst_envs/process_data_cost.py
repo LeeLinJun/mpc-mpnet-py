@@ -4,8 +4,17 @@ import pickle
 import re
 import click
 from systems.acrobot import Acrobot
+from pathlib import Path
 
-def interpolate_path(path_dict, dynamics=Acrobot(), interval_steps=20, step_size=2e-2):
+def get_dynamics(dynamics):
+    sys_dict = {
+        "acrobot_obs": "Acrobot",
+        "cartpole_obs": "CartPole"
+    }
+    return eval("sys_dict[dynamics]()")
+
+def interpolate_path(path_dict, system="acrobot_obs", interval_steps=20, step_size=2e-2):
+    dynamics = get_dynamics(system)
     ref_path = path_dict['path']
     ref_control = path_dict['control']
     ref_time = path_dict['cost']
@@ -36,7 +45,28 @@ def interpolate_path(path_dict, dynamics=Acrobot(), interval_steps=20, step_size
     #print(waypoints) 
     return waypoints, costs_sofar, costs2go
 
-def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=False, system="acrobot_obs"):
+def subsample_path(data, gt, c2g, csf, c, transit_pair_data, th=0):
+    curr_cost = 0
+    # print(c)
+    subs_data, subs_transit_pair_data, subs_gt, subs_c2g, subs_csf, subs_c = [], [], [], [], [], []
+    for i in range(len(data)):
+        curr_cost += c[i]
+        # print(curr_cost)
+        if curr_cost < th and i < len(data)-1 and i > 0:
+            continue
+        else:
+            curr_cost = 0
+            subs_data.append(data[i])
+            subs_transit_pair_data.append(transit_pair_data[i])
+            subs_gt.append(gt[i])
+            subs_c2g.append(c2g[i])
+            subs_csf.append(csf[i])
+            subs_c.append(c[i])
+    return [np.array(d) for d in [subs_data, subs_gt, subs_c2g, subs_csf, subs_c, subs_transit_pair_data]]
+
+
+
+def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=False, system="acrobot_obs", th=0, goal_aug=False):
     """
     [env_id, state, goal]
     """    
@@ -64,16 +94,17 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=False, syst
 #    data.append(np.concatenate(([env_id], start_goal[0], start_goal[-1])))
 #    gt.append(path[0, :])
     for i_start in range(n_nodes-1):
-        data.append(np.concatenate(([env_id], path[i_start, :], start_goal[-1])))
+        data.append(np.concatenate(([env_id], path[i_start, :], path[-1])))
         transit_pair_data.append(np.concatenate(([env_id], path[i_start, :], path[i_start+1, :])))
         gt.append(path[i_start+1, :])
         c2g.append(costs2go[i_start])
         csf.append(costs_sofar[i_start])
         c.append(costs[i_start])
-        ## goal aug
-#         for i_goal in range(i_start+1, n_nodes):#[n_nodes-1]:#
-#             data.append(np.concatenate(([env_id], path[i_start, :], path[i_goal, :])))
-#             gt.append(path[i_start+1, :])
+        if goal_aug:
+            ## goal aug
+            for i_goal in range(i_start+1, n_nodes):#[n_nodes-1]:#
+                data.append(np.concatenate(([env_id], path[i_start, :], path[i_goal, :])))
+                gt.append(path[i_start+1, :])
             
     # last path node to goal
     #data.append(np.concatenate(([env_id], path[-1, :], start_goal[-1])))
@@ -85,6 +116,11 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=False, syst
     csf = np.array(csf)
     c = np.array(c)
     transit_pair_data = np.array(transit_pair_data)
+
+    if False: #th > 0:
+        data, gt, c2g, csf, c, transit_pair_data = \
+            subsample_path(data, gt, c2g, csf, c, transit_pair_data, th=th)
+
     if normalize:
         if system == "acrobot_obs":
             data[:, [1,2,5,6]] /= np.pi
@@ -105,7 +141,6 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=False, syst
             gt[:, 1] /= 40
             gt[:, 2] /= np.pi
             gt[:, 3] /= 2
-            
         else:
             raise NotImplementedError("unkown dynamics")
     return data, gt, c2g, csf, c, transit_pair_data
@@ -114,18 +149,26 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=False, syst
 @click.command()
 @click.option('--num', default=10)
 @click.option('--system', default='cartpole_obs')
-@click.option('--traj_num', default=1000)
+@click.option('--traj_num', default=2000)
 @click.option('--setup', default='default_norm')
 @click.option('--normalize', default=True)
 @click.option('--interpolate', default=False)
-def main(num, system, traj_num, setup, normalize, interpolate):
+@click.option('--subsample_th', default=.0)
+@click.option('--goal_aug', default=False)
+def main(num, system, traj_num, setup, normalize, interpolate, subsample_th, goal_aug):
     data, gt, cost_to_go, cost_so_far, cost = [], [], [], [], []
     transit_pair_data = []
     for env_id in range(num):
         for traj_id  in range(traj_num):
             # try:
             path_dict = load_data(system, env_id, traj_id)
-            d, g, c2g, csf, c, tp_d = path_to_tensor_forward(env_id, path_dict, normalize, interpolate=interpolate, system=system)
+            d, g, c2g, csf, c, tp_d = path_to_tensor_forward(env_id, 
+                                                             path_dict,
+                                                             normalize,
+                                                             interpolate=interpolate,
+                                                             system=system,
+                                                             th=subsample_th,
+                                                             goal_aug=goal_aug)
             data.append(d)
             gt.append(g)
             cost_to_go.append(c2g)
@@ -142,6 +185,7 @@ def main(num, system, traj_num, setup, normalize, interpolate):
     transit_pair_data = np.concatenate(transit_pair_data, axis=0)
     print(data.shape, gt.shape, cost_to_go.shape, cost_so_far.shape, transit_pair_data.shape)
 
+    Path("{}".format(setup)).mkdir(parents=True, exist_ok=True)
     np.save('{}/{}_path_data.npy'.format(setup, system), data)
     np.save('{}/{}_gt.npy'.format(setup, system), gt)
     np.save('{}/{}_cost_to_go.npy'.format(setup, system), cost_to_go)

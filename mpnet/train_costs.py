@@ -26,7 +26,7 @@ def main(ae_output_size, state_size, lr, epochs, batch,
     system_env, system, setup, loss_type, load_from, network_type,
     data_type, label_type):
     mpnet = MPNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4)
-    mpnet.load_state_dict(torch.load('output/acrobot_obs/{}/{}/ep10000.pth'.format(setup,load_from)))
+    mpnet.load_state_dict(torch.load('output/{}/{}/{}/ep10000.pth'.format(system, setup,load_from)))
     
     costnet = CostNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4, encoder=mpnet.encoder)
     # for param in costnet.encoder.parameters():
