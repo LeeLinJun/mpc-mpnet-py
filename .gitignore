@@ -7,3 +7,6 @@
 
 /mpnet/output/
 
+**/.vscode
+**/.ipynb_checkpoints
+**/__pycache__

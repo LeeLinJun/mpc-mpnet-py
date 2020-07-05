@@ -4,30 +4,29 @@ def get_params():
     params = {
         'solver_type' : "cem_cuda",
         'n_problem' : 8,
-
-        'n_sample': 128,
+        'n_sample': 32,
         'n_elite': 4,
-        'n_t': 3,
+        'n_t': 1,
         'max_it': 3,
-        'converge_r': 3e-1,
+        'converge_r': 1e-1,
         
         'dt': 2e-3,
 
         'mu_u': 0,
         'sigma_u': 400,
 
-        'mu_t': 5e-2,
-        'sigma_t': 1,
-        't_max': 0.3,
+        'mu_t': 0.4,
+        'sigma_t': 0.5,
+        't_max': 0.6,
 
         'verbose': False,#True,# 
         'step_size': 0.8,
 
         "goal_radius": 1.5,
 
-        "sst_delta_near": .1,
-        "sst_delta_drain": .05,
-        "goal_bias": 0.05,
+        "sst_delta_near": .2,
+        "sst_delta_drain": .1,
+        "goal_bias": 0.1,
 
         "width": 4,
         "hybrid": False,
@@ -45,14 +44,14 @@ def get_params():
         "cost_to_go_predictor_weight_path": "mpnet/exported/output/cartpole_obs/cost_to_go_10k.pt",
 
         "refine": False,
-        "using_one_step_cost": True,
+        "using_one_step_cost": False,
         "refine_lr": 0,
         "refine_threshold": 0,
-        "device_id": "cuda:0",
+        "device_id": "cuda:2",
 
         "cost_reselection": False,
         "number_of_iterations": 10000,
-        "weights_array": [1, .8, 0.5, 0.5],
+        "weights_array": [1, .5, 1, .5],
 
         
     }

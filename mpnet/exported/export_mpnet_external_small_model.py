@@ -8,7 +8,7 @@ from export import export
 
 # from networks.mpnet_cartpole_obs import MPNet
 #from dataset.dataset import get_loader
-from config import *
+# from config import *
 from torch.autograd import Variable
 
 class MLP(nn.Module):
@@ -126,8 +126,8 @@ def main(system_env, system, setup, ep, outputfn):
     # load_func(mpnet, '/media/arclabdl1/HD1/YLmiao/results/KMPnet_res/cartpole_obs_lr0.001000_SGD_step_100/kmpnet_epoch_9950_direction_0_step_100.pkl')
     # load_func(mpnet, '/media/arclabdl1/HD1/YLmiao/results/KMPnet_res/cartpole_obs_3_lr0.001000_Adagrad_step_200/kmpnet_epoch_2600_direction_0_step_200.pkl')
     load_func(mpnet, '/media/arclabdl1/HD1/YLmiao/results/KMPnet_res/cartpole_obs_4_lr0.010000_Adagrad_step_200/kmpnet_epoch_3150_direction_0_step_200.pkl')
-    #mpnet.train()
-    mpnet.eval()
+    mpnet.train()
+    #mpnet.eval()
     export(mpnet, setup=setup, system_env=system_env, system=system, exported_path="exported/output/{}/{}".format(system, outputfn))
 
 if __name__ == '__main__':

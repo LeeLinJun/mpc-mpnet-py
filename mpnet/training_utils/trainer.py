@@ -28,8 +28,9 @@ def train_network(network, data_loaders, network_name="mpnet",
     logger = Logger("output/{}/{}/{}/".format(system, setup, network_name))
 
     get_loss = lambda output, label:eval("torch.nn.functional."+loss_type)(output, label)
-    loss_coeff = np.array([15, 20., 15.7, 2.])
-    loss_coeff /= np.sum(loss_coeff)
+    
+    # loss_coeff = np.array([15, 20., 15.7, 2.])
+    # loss_coeff /= np.sum(loss_coeff)
     
     with tqdm(range(epochs+1), total=epochs+1) as pbar:
         for ep in range(epochs+1):
@@ -50,7 +51,7 @@ def train_network(network, data_loaders, network_name="mpnet",
 
                 loss_tensor = torch.zeros(label.size(1))
                 for dim_i in range(label.size(1)):
-                    loss_tensor[dim_i] = get_loss(output[:, dim_i], label[:, dim_i]) * loss_coeff[dim_i]
+                    loss_tensor[dim_i] = get_loss(output[:, dim_i], label[:, dim_i]) #* loss_coeff[dim_i]
                 loss = torch.sum(loss_tensor)
                 loss.backward()
                 train_loss_list.append(loss.item())

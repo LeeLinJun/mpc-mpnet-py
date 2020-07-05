@@ -24,7 +24,7 @@ def get_params():
 
         "sst_delta_near": .1,
         "sst_delta_drain": .05,
-        "goal_bias": 0.01,
+        "goal_bias": 0.05,
 
         "width": 4,
         "hybrid": False,

@@ -22,13 +22,24 @@ from training_utils.trainer import train_network
 @click.option('--network_type', default='cost_transit')
 @click.option('--data_type', default='transit_pair_data')
 @click.option('--label_type', default='cost')
+@click.option('--from_exported', default=True)
 def main(ae_output_size, state_size, lr, epochs, batch, 
     system_env, system, setup, loss_type, load_from, network_type,
-    data_type, label_type):
-    mpnet = MPNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4)
-    mpnet.load_state_dict(torch.load('output/{}/{}/{}/ep10000.pth'.format(system, setup,load_from)))
+    data_type, label_type, from_exported):
+    if from_exported:
+        import sys
+        sys.path.append("/media/arclabdl1/HD1/Linjun/mpc-mpnet-py/mpnet/exported")
+        from exported.export_mpnet_external_small_model import KMPNet, load_func, Encoder, MLP
+        mpnet = KMPNet(total_input_size=8, AE_input_size=32, mlp_input_size=40, output_size=4, CAE=Encoder, MLP=MLP, loss_f=None)
+        load_func(mpnet, '/media/arclabdl1/HD1/YLmiao/results/KMPnet_res/cartpole_obs_4_lr0.010000_Adagrad_step_200/kmpnet_epoch_3150_direction_0_step_200.pkl')
+        
+        costnet = CostNet(ae_input_size=32, ae_output_size=32, in_channels=1, state_size=4, encoder=mpnet.encoder)
+    else:
+        from networks.mpnet import MPNet
+        mpnet = MPNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4)
+        mpnet.load_state_dict(torch.load('output/{}/{}/{}/ep10000.pth'.format(system, setup,load_from)))
     
-    costnet = CostNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4, encoder=mpnet.encoder)
+        costnet = CostNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4, encoder=mpnet.encoder)
     # for param in costnet.encoder.parameters():
     #     param.requires_grad = False
 

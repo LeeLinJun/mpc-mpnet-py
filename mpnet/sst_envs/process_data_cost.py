@@ -100,11 +100,11 @@ def path_to_tensor_forward(env_id, path_dict, normalize, interpolate=False, syst
         c2g.append(costs2go[i_start])
         csf.append(costs_sofar[i_start])
         c.append(costs[i_start])
-        if goal_aug:
-            ## goal aug
-            for i_goal in range(i_start+1, n_nodes):#[n_nodes-1]:#
-                data.append(np.concatenate(([env_id], path[i_start, :], path[i_goal, :])))
-                gt.append(path[i_start+1, :])
+        # if goal_aug:
+        #     ## goal aug
+        #     for i_goal in range(i_start+1, n_nodes):#[n_nodes-1]:#
+        #         data.append(np.concatenate(([env_id], path[i_start, :], path[i_goal, :])))
+        #         gt.append(path[i_start+1, :])
             
     # last path node to goal
     #data.append(np.concatenate(([env_id], path[-1, :], start_goal[-1])))
