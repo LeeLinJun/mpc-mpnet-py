@@ -81,7 +81,7 @@ def main(system="acrobot_obs"):
     obc_list = np.array([loader(system, env_id, "obc").reshape(-1, 2) for env_id in range(10)])
     obs_vox = pcd_to_voxel2d(obc_list, voxel_size=[32, 32]).reshape(-1, 1, 32, 32)
     print("Saving {}_env_vox.npy with dim {}".format(system, obs_vox.shape))
-    np.save("{}_env_vox.npy".format(system), obs_vox)
+    np.save("data/{}_env_vox.npy".format(system), obs_vox)
 
 if __name__ == '__main__':
     main()

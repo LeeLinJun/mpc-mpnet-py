@@ -31,7 +31,6 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params_mod
     integration_step = params['dt']
     planner = _deep_smp_module.DSSTMPCWrapper(
             system_type=system,
-            solver_type=params['solver_type'],
             start_state=np.array(data['start_goal'][0]),
             #goal_state=np.array(ref_path[-1]),
             goal_state=np.array(data['start_goal'][1]),
@@ -46,9 +45,8 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params_mod
             cost_predictor_weight_path=params['cost_predictor_weight_path'],
             cost_to_go_predictor_weight_path=params['cost_to_go_predictor_weight_path'],
             num_sample=params['cost_samples'],
-            np=params['n_problem'], ns=params['n_sample'], nt=params['n_t'], ne=params['n_elite'], 
-            max_it=params['max_it'], converge_r=params['converge_r'], 
-            mu_u=params['mu_u'], std_u=params['sigma_u'], mu_t=params['mu_t'], 
+            ns=params['n_sample'], nt=params['n_t'], ne=params['n_elite'], max_it=params['max_it'],
+            converge_r=params['converge_r'], mu_u=params['mu_u'], std_u=params['sigma_u'], mu_t=params['mu_t'], 
             std_t=params['sigma_t'], t_max=params['t_max'], step_size=params['step_size'], integration_step=params['dt'], 
             device_id=params['device_id'], refine_lr=params['refine_lr'],
             weights_array=params['weights_array'],
@@ -61,34 +59,14 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params_mod
     ## start experiment
     tic = time.perf_counter()
     for iteration in tqdm(range(number_of_iterations)):
-        # planner.step(min_time_steps, max_time_steps, params['dt'])
-
-        # if params['hybrid']:
-        #     if np.random.rand() < params['hybrid_p']:
-        #         # planner.step(min_time_steps, max_time_steps, integration_step)
-        #          planner.mpc_step(integration_step)
-        #     else:
-        #         planner.neural_step(params['refine'], 
-        #             refine_threshold=params['refine_threshold'],
-        #             using_one_step_cost=params['using_one_step_cost'],
-        #             cost_reselection=params['cost_reselection'])
-        # else:
-        #     planner.step(min_time_steps, max_time_steps, integration_step)
-        #     planner.neural_step(params['refine'], 
-        #             refine_threshold=params['refine_threshold'],
-        #             using_one_step_cost=params['using_one_step_cost'],
-        #             cost_reselection=params['cost_reselection'])
-        
-        # planner.mpc_step(integration_step)
-        #goal_bias = (0.2 - params['goal_bias']) / number_of_iterations * iteration + params['goal_bias']
-        planner.neural_step_batch(params['refine'], 
-                            refine_threshold=params['refine_threshold'],
-                            using_one_step_cost=params['using_one_step_cost'],
-                            cost_reselection=params['cost_reselection'],
-                            goal_bias=params['goal_bias'],
-                            num_of_problem=params['n_problem'])
+        planner.deep_smp_step(params['refine'], 
+                              refine_threshold=params['refine_threshold'],
+                              using_one_step_cost=params['using_one_step_cost'],
+                              cost_reselection=params['cost_reselection'],
+                              goal_bias=params['goal_bias'],
+                              NP=params['n_problem'])
         solution = planner.get_solution()
-        if solution is not None: #and np.sum(solution[2]) < th:
+        if solution is not None or time.perf_counter()-tic > params['max_planning_time']: #and np.sum(solution[2]) < th:
             break    
     toc = time.perf_counter()
     if solution is not None:
@@ -124,10 +102,10 @@ def full_benchmark(num_env, num_traj, save=True, config='default', report=True, 
                 time[env_id, traj_id] = result['planning_time']
                 costs[env_id, traj_id] = result['costs']
             if save:
-                Path("results/cpp_full/{}/{}/".format(system, config)).mkdir(parents=True, exist_ok=True)
-                np.save('results/cpp_full/{}/{}/sr_{}_{}.npy'.format(system, config, num_env, num_traj), sr)
-                np.save('results/cpp_full/{}/{}/time_{}_{}.npy'.format(system, config, num_env, num_traj), time)
-                np.save('results/cpp_full/{}/{}/costs_{}_{}.npy'.format(system, config,  num_env, num_traj), costs)
+                Path("results/cpp_smp_full/{}/{}/".format(system, config)).mkdir(parents=True, exist_ok=True)
+                np.save('results/cpp_smp_full/{}/{}/sr_{}_{}.npy'.format(system, config, num_env, num_traj), sr)
+                np.save('results/cpp_smp_full/{}/{}/time_{}_{}.npy'.format(system, config, num_env, num_traj), time)
+                np.save('results/cpp_smp_full/{}/{}/costs_{}_{}.npy'.format(system, config,  num_env, num_traj), costs)
             if report:
                 sr_list = sr.reshape(-1)[:(num_traj*env_id+traj_id+1)]
                 mask = sr_list > 0

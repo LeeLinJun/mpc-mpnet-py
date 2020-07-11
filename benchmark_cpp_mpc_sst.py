@@ -19,7 +19,7 @@ def experiment(env_id, traj_id, verbose=False, model='acrobot_obs', params_modul
     data = load_data(model, env_id, traj_id)
     ref_path = data['path']
     start_goal = data['start_goal']
-    env_vox = np.load('mpnet/sst_envs/acrobot_obs_env_vox.npy')
+    env_vox = np.load('mpnet/sst_envs/data/acrobot_obs_env_vox.npy')
     obc = env_vox[env_id, 0]
     width = 6
     number_of_iterations = 60000

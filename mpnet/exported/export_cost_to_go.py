@@ -13,7 +13,9 @@ from config import *
 @click.option('--setup', default='default_norm')
 @click.option('--ep', default=10000)
 @click.option('--from_exported', default=True)
-def main(system_env, system, setup, ep, from_exported):
+@click.option('--network_type', default="cost_to_go")
+@click.option('--outputfn', default="cost_to_go.pt")
+def main(system_env, system, setup, ep, from_exported, network_type, outputfn):
     if from_exported:
         from exported.export_mpnet_external_small_model import KMPNet, load_func, Encoder, MLP
         mpnet = KMPNet(total_input_size=8, AE_input_size=32, mlp_input_size=40, output_size=4, CAE=Encoder, MLP=MLP, loss_f=None).cuda()
@@ -28,8 +30,8 @@ def main(system_env, system, setup, ep, from_exported):
             state_size=state_size[system]).cuda()
         costnet = CostNet(ae_input_size=32, ae_output_size=1024, in_channels=1, state_size=4, encoder=mpnet.encoder).cuda()
     
-    costnet.load_state_dict(torch.load('output/{}/{}/cost_to_go/ep{}.pth'.format(system, setup, ep)))
+    costnet.load_state_dict(torch.load('output/{}/{}/{}/ep{}.pth'.format(system, setup, network_type, ep)))
     costnet.eval()
-    export(costnet, setup=setup, system_env=system_env, system=system, exported_path="exported/output/{}/cost_to_go_10k.pt".format(system))
+    export(costnet, setup=setup, system_env=system_env, system=system, exported_path="exported/output/{}/{}.pt".format(system, outputfn))
 if __name__ == '__main__':
     main()

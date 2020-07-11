@@ -19,10 +19,10 @@ from training_utils.trainer import train_network
 @click.option('--setup', default='default_norm')
 @click.option('--loss_type', default='l1_loss')
 @click.option('--lr_step_size', default=100)
-@click.option('--add_noise', default=True)
+@click.option('--aug', default=True)
 @click.option('--network_name', default="mpnet")
 def main(ae_output_size, state_size, lr, epochs, batch, 
-    system_env, system, setup, loss_type, lr_step_size, add_noise, network_name):
+    system_env, system, setup, loss_type, lr_step_size, aug, network_name):
     # mpnet_module = importlib.import_module('.mpnet_{}'.format(system), package=".networks")
     try:
         if system == 'cartpole_obs':
@@ -45,7 +45,7 @@ def main(ae_output_size, state_size, lr, epochs, batch,
         lr=lr, epochs=epochs, batch=batch, 
         system_env=system_env, system=system, setup=setup,
         using_step_lr=True, step_size=lr_step_size, gamma=0.9,
-        loss_type=loss_type, weight_save_epochs=25, add_noise=add_noise)
+        loss_type=loss_type, weight_save_epochs=25, aug=aug)
 
 if __name__ == '__main__':
     main()

@@ -4,10 +4,10 @@ def get_params():
     params = {
         'solver_type' : "cem_cuda",
         'n_problem' : 8,
-        'n_sample': 32,
-        'n_elite': 4,
+        'n_sample': 64,
+        'n_elite': 2,
         'n_t': 1,
-        'max_it': 3,
+        'max_it': 8,
         'converge_r': 1e-1,
         
         'dt': 2e-3,

@@ -2,31 +2,30 @@ import numpy as np
 
 def get_params():
     params = {
-        'solver_type' : "cem_cuda",
-        'n_problem' : 8,
-
-        'n_sample': 128,
-        'n_elite': 4,
-        'n_t': 3,
-        'max_it': 3,
-        'converge_r': 3e-1,
         
+        'n_problem': 1,
+        'n_sample': 32,
+        'n_elite': 8,
+        'n_t': 2,
+        'max_it': 5,
+        'converge_r': 0.1,
+
         'dt': 2e-3,
 
         'mu_u': 0,
         'sigma_u': 400,
 
-        'mu_t': 5e-2,
-        'sigma_t': 1,
-        't_max': 0.3,
+        'mu_t': 0.1,
+        'sigma_t': 0.2,
+        't_max': 1,
 
-        'verbose': False,#True,# 
-        'step_size': 0.8,
+        'verbose':  False,#True,#
+        'step_size': 1,
 
         "goal_radius": 1.5,
 
-        "sst_delta_near": .1,
-        "sst_delta_drain": .05,
+        "sst_delta_near": .3,
+        "sst_delta_drain": 0.1,
         "goal_bias": 0.05,
 
         "width": 4,
@@ -41,21 +40,23 @@ def get_params():
         # "mpnet_weight_path":"mpnet/exported/output/cartpole_obs/mpnet_10k_nonorm.pt",
         # "mpnet_weight_path":"mpnet/exported/output/cartpole_obs/mpnet_subsample0.5_10k.pt",
 
+        # "cost_predictor_weight_path": "mpnet/exported/output/cartpole_obs/cost_10k.pt",
         "cost_predictor_weight_path": "mpnet/exported/output/cartpole_obs/cost_10k.pt",
-        "cost_to_go_predictor_weight_path": "mpnet/exported/output/cartpole_obs/cost_to_go_10k.pt",
+
+        "cost_to_go_predictor_weight_path": "mpnet/exported/output/cartpole_obs/cost_to_go_obs.pt",
 
         "refine": False,
-        "using_one_step_cost": True,
+        "using_one_step_cost": False,
         "refine_lr": 0,
         "refine_threshold": 0,
-        "device_id": "cuda:0",
+        "device_id": "cuda:3",
 
         "cost_reselection": False,
-        "number_of_iterations": 10000,
-        "weights_array": [1, .8, 0.5, 0.5],
+        "number_of_iterations": 100000,
+        "weights_array": [1, 1, 1, 0.5],
+        'max_planning_time': 50,
 
-        
+
     }
 
     return params
-    

@@ -24,3 +24,7 @@ class MPNet(nn.Module):
         else:
             z_x = x
         return self.pnet(z_x)
+    
+    def aug(self, data, label, noise=[1e-2, 1e-2, 1e-1, 1e-1, 0, 0, 0, 0]):
+        data[:, 1:] += torch.empty(data[:, 1:].size(0), data[:, 1:].size(1)).uniform_(-1, 1) * torch.tensor(noise)
+        return data, label

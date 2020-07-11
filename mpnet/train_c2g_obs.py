@@ -18,14 +18,13 @@ from training_utils.trainer import train_network
 @click.option('--setup', default='default_norm')
 @click.option('--loss_type', default='l1_loss')
 @click.option('--load_from', default='mpnet')
-@click.option('--network_type', default='cost_to_go')
-@click.option('--data_type', default='path_data')
-@click.option('--label_type', default='cost_to_go')
+@click.option('--network_type', default='cost_to_go_obs')
+@click.option('--data_type', default='data_with_obs')
+@click.option('--label_type', default='c2g_with_obs')
 @click.option('--from_exported', default=True)
-@click.option('--aug', default=False)
 def main(ae_output_size, state_size, lr, epochs, batch, 
     system_env, system, setup, loss_type, load_from, network_type,
-    data_type, label_type, from_exported, aug):
+    data_type, label_type, from_exported):
     if from_exported:
         import sys
         sys.path.append("/media/arclabdl1/HD1/Linjun/mpc-mpnet-py/mpnet/exported")
@@ -50,7 +49,7 @@ def main(ae_output_size, state_size, lr, epochs, batch,
         lr=lr, epochs=epochs, batch=batch, 
         system_env=system_env, system=system, setup=setup,
         using_step_lr=True, step_size=100, gamma=0.9,
-        loss_type=loss_type, weight_save_epochs=50, aug=aug)
+        loss_type=loss_type, weight_save_epochs=50)
 
 
 if __name__ == "__main__":

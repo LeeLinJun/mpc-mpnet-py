@@ -20,7 +20,7 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params_mod
     ref_path = data['path']
     start_goal = data['start_goal']
     # print(start_goal)
-    env_vox = np.load('mpnet/sst_envs/{}_env_vox.npy'.format(system))
+    env_vox = np.load('mpnet/sst_envs/data/{}_env_vox.npy'.format(system))
     obc = env_vox[env_id, 0]
     # print(obc.reshape(-1), obc.reshape(-1).shape)
     # print(obs_list)
