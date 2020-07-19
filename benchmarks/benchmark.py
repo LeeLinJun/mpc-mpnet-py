@@ -15,7 +15,7 @@ def full_benchmark(num_env,
                    report=True,
                    params=None,
                    system='acrobot_obs',
-                   traj_id_offset=800):
+                   traj_id_offset=1800):
 
     sr = np.zeros((num_env, num_traj))
     time = np.zeros((num_env, num_traj))
@@ -46,12 +46,12 @@ def full_benchmark(num_env,
 @click.option('--env_id', default=0)
 @click.option('--traj_id', default=0)
 @click.option('--num_env', default=10)
-@click.option('--num_traj', default=100)
+@click.option('--num_traj', default=200)
 @click.option('--save', default=True)
 @click.option('--config', default='default')
 @click.option('--report', default=True)
 @click.option('--system', default="cartpole_obs")
-@click.option('--traj_id_offset', default=1900)
+@click.option('--traj_id_offset', default=1800)
 @click.option('--experiment_type', default="shm")
 def main(full, env_id, traj_id, num_env, num_traj, save, config, report, system, traj_id_offset, experiment_type):
     result = full_benchmark(num_env, 
