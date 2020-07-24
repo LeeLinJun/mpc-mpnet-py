@@ -1,9 +1,9 @@
 #! /bin/bash
 source activate linjun
-#python exported/export_mpnet.py --system acrobot_obs
-#python exported/export_cost_to_go.py --system acrobot_obs
-## python exported/export_cost_so_far.py --system acrobot_obs
-#python exported/export_cost.py --system acrobot_obs
+python exported/export_mpnet.py --system acrobot_obs
+# python exported/export_cost_to_go.py --system acrobot_obs
+# python exported/export_cost_so_far.py --system acrobot_obs
+# python exported/export_cost.py --system acrobot_obs
 
 # python exported/export_mpnet.py --system cartpole_obs 
 #python exported/export_mpnet.py --system cartpole_obs  --ep 1000
@@ -32,8 +32,10 @@ source activate linjun
 # python exported/export_mpnet.py --system cartpole_obs --setup default_norm_subsample0.2 --outputfn mpnet_subsample0.2_10k.pt 
 
 # python exported/export_cost_to_go.py --system cartpole_obs --ep 2500
-python exported/export_cost_to_go.py --system cartpole_obs --ep 1000 --network_type cost_to_go_obs --outputfn cost_to_go_obs
-python exported/export_cost_to_go.py --system cartpole_obs --ep 1000 --network_type cost_to_go_aug --outputfn cost_to_go_aug
 
 # python exported/export_cost_so_far.py --system cartpole_obs
 # python exported/export_cost.py --system cartpole_obs  --ep 2500
+
+
+# python exported/export_cost_to_go.py --system cartpole_obs --ep 1000 --network_type cost_to_go_obs --outputfn cost_to_go_obs
+# python exported/export_cost_to_go.py --system cartpole_obs --ep 1000 --network_type cost_to_go_aug --outputfn cost_to_go_aug

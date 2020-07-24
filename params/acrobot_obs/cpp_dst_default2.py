@@ -6,16 +6,16 @@ def get_params():
         'n_problem': 1,
         'n_sample': 32,
         'n_elite': 4,
-        'n_t': 1,
+        'n_t': 2,
         'max_it': 3,
         'converge_r': 1e-1,
 
         'dt': 2e-2,
         'mu_u': 0,
         'sigma_u': 4,
-        'mu_t': 2e-1,
+        'mu_t': 3e-1,
         'sigma_t': 5e-1,
-        't_max': 1,
+        't_max': 0.8,
         'verbose': False,#True, #
         'step_size': 0.75,
 
@@ -34,10 +34,10 @@ def get_params():
         "cost_to_go_predictor_weight_path": "mpnet/exported/output/acrobot_obs/cost_to_go_10k.pt",
 
         "refine": False,
-        "using_one_step_cost": False,
+        "using_one_step_cost": True,
         "refine_lr": 0,
         "refine_threshold": 0,
-        "device_id": "cuda:2",
+        "device_id": "cuda:3",
 
         "cost_reselection": False,
         "number_of_iterations": 40000,

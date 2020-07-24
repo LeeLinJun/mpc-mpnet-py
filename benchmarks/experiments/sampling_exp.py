@@ -26,7 +26,7 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
     planner = _deep_smp_module.DSSTMPCWrapper(
             system_type=system,
             start_state=np.array(data['start_goal'][0]),
-            #goal_state=np.array(ref_path[-1]),
+            # goal_state=np.array(ref_path[-1]),
             goal_state=np.array(data['start_goal'][1]),
             goal_radius=params['goal_radius'],
             random_seed=0,
@@ -79,11 +79,11 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
                             cost_reselection=params['cost_reselection'],
                             goal_bias=params['goal_bias'])
         solution = planner.get_solution()
-        if solution is not None: #and np.sum(solution[2]) < th:
+        if solution is not None or time.perf_counter()-tic > params['max_planning_time']: #and np.sum(solution[2]) < th:
             break    
     toc = time.perf_counter()
-    if solution is not None:
-        print(solution[0], solution[2])
+    # if solution is not None:
+    #     print(solution[0], solution[2])
 #     print(mpc_mpnet.costs)
     costs = solution[2].sum() if solution is not None else np.inf
     result = {

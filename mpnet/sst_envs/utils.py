@@ -2,6 +2,8 @@ import pickle
 import numpy as np
 
 def load_data(model, env, traj_id):
+    if model == 'acrobot_obs':
+        model = 'acrobot_obs_backup'
     filepath = lambda var: "/media/arclabdl1/HD1/Linjun/data/kinodynamic/{model}/{env}/{var}_{id}.pkl".format(model=model,env=env, var=var, id=traj_id)      
     load_pkl = lambda var: pickle.load(open(filepath(var), "rb"))
     keys = ["control", "path", "start_goal", "time", 'cost']

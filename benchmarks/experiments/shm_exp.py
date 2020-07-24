@@ -11,6 +11,7 @@ from sparse_rrt import _deep_smp_module
 
 def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=None):
     print("env {}, traj {}".format(env_id, traj_id))
+    # print(params)
     obs_list = get_obs(system, env_id)[env_id].reshape(-1, 2)
     data = load_data(system, env_id, traj_id)
     ref_path = data['path']
@@ -63,8 +64,8 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
         if solution is not None or time.perf_counter()-tic > params['max_planning_time']: #and np.sum(solution[2]) < th:
             break    
     toc = time.perf_counter()
-    if solution is not None:
-        print(solution[0], solution[2])
+    # if solution is not None:
+    #     print(solution[0], solution[2])
 #     print(mpc_mpnet.costs)
     costs = solution[2].sum() if solution is not None else np.inf
     result = {

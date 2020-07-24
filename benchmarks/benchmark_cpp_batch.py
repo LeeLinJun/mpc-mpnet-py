@@ -142,12 +142,12 @@ def full_benchmark(num_env, num_traj, save=True, config='default', report=True, 
 @click.option('--env_id', default=0)
 @click.option('--traj_id', default=0)
 @click.option('--num_env', default=10)
-@click.option('--num_traj', default=100)
+@click.option('--num_traj', default=200)
 @click.option('--save', default=True)
 @click.option('--config', default='default')
 @click.option('--report', default=True)
 @click.option('--system', default="cartpole_obs")
-@click.option('--traj_id_offset', default=1900)
+@click.option('--traj_id_offset', default=1800)
 def main(full, env_id, traj_id, num_env, num_traj, save, config, report, system, traj_id_offset):
     p = importlib.import_module('.cpp_dst_{}'.format(config), package=".params.{}".format(system))
     if not full:
