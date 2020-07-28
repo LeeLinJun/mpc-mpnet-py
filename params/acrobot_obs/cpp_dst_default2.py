@@ -4,9 +4,9 @@ def get_params():
     params = {
         'solver_type' : "cem",
         'n_problem': 1,
-        'n_sample': 32,
+        'n_sample': 64,
         'n_elite': 4,
-        'n_t': 2,
+        'n_t': 1,
         'max_it': 3,
         'converge_r': 1e-1,
 
@@ -15,7 +15,7 @@ def get_params():
         'sigma_u': 4,
         'mu_t': 3e-1,
         'sigma_t': 5e-1,
-        't_max': 0.8,
+        't_max': 2,
         'verbose': False,#True, #
         'step_size': 0.75,
 
@@ -27,22 +27,24 @@ def get_params():
         "width": 6,
         "hybrid": False,
         "hybrid_p": 0.,
-        "cost_samples": 10,
+        "cost_samples": 1,
         "mpnet_weight_path":"mpnet/exported/output/acrobot_obs/mpnet_10k.pt",
     
         "cost_predictor_weight_path": "mpnet/exported/output/acrobot_obs/cost_10k.pt",
         "cost_to_go_predictor_weight_path": "mpnet/exported/output/acrobot_obs/cost_to_go_10k.pt",
 
         "refine": False,
-        "using_one_step_cost": True,
+        "using_one_step_cost": False,
         "refine_lr": 0,
         "refine_threshold": 0,
         "device_id": "cuda:3",
 
         "cost_reselection": False,
         "number_of_iterations": 40000,
-        "weights_array": [1, 1, .5, .5],
+        "weights_array": [1, 1, .2, .2],
         'max_planning_time': 50,
+        'shm_max_steps': 20
+
     }
 
     return params

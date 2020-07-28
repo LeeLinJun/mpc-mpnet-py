@@ -54,15 +54,21 @@ def full_benchmark(num_env,
 @click.option('--traj_id_offset', default=1800)
 @click.option('--experiment_type', default="shm")
 def main(full, env_id, traj_id, num_env, num_traj, save, config, report, system, traj_id_offset, experiment_type):
-    result = full_benchmark(num_env, 
-                            num_traj, 
-                            experiment_type, 
-                            save=save,
-                            config=config,
-                            report=report, 
-                            params=importlib.import_module('.cpp_dst_{}'.format(config), package=".params.{}".format(system)).get_params(),
-                            system=system,
-                            traj_id_offset=traj_id_offset)
+    if full is not True:
+        experiment_func = importlib.import_module(".{}_exp".format(experiment_type), package="experiments").experiment
+        experiment_func(env_id, traj_id,
+                        params=importlib.import_module('.cpp_dst_{}'.format(config), package=".params.{}".format(system)).get_params(), 
+                        system=system)
+    else: 
+        result = full_benchmark(num_env, 
+                                num_traj,
+                                experiment_type, 
+                                save=save,
+                                config=config,
+                                report=report, 
+                                params=importlib.import_module('.cpp_dst_{}'.format(config), package=".params.{}".format(system)).get_params(),
+                                system=system,
+                                traj_id_offset=traj_id_offset)
 
 if __name__ == '__main__':
     main()
