@@ -1,11 +1,13 @@
 import importlib
 import click
 import numpy as np
-from mpnet.sst_envs.utils import load_data, get_obs
 import pickle
 import time
 from tqdm import tqdm
 from pathlib import Path
+import sys
+sys.path.append('/media/arclabdl1/HD1/Linjun/mpc-mpnet-py')
+from mpnet.sst_envs.utils import load_data, get_obs
 
 def full_benchmark(num_env, 
                    num_traj,

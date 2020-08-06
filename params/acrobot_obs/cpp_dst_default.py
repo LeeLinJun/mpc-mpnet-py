@@ -11,8 +11,8 @@ def get_params():
         'converge_r': 1e-1,
 
         'dt': 2e-2,
-        'mu_u': 0,
-        'sigma_u': 6,
+        'mu_u': [0],
+        'sigma_u': [6],
         'mu_t': 2e-1,
         'sigma_t': 0.8,
         't_max': 2,

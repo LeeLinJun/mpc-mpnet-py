@@ -10,3 +10,7 @@
 **/.vscode/
 **/.ipynb_checkpoints
 **/__pycache__/
+
+**.gif
+*.zip
+data_gen/trajectories
