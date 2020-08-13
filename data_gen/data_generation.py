@@ -3,7 +3,7 @@ using SST* to generate near-optimal paths in specified environment
 """
 
 import sys
-sys.path.append('/media/arclabdl1/HD1/Linjun/mpc-mpnet-py/deps/sparse_rrt-1')
+sys.path.append('/home/srip19-pointcloud/linjun/robotics/mpc-mpnet-py/deps/sparse_rrt-1')
 from sparse_rrt import _sst_module
 from sparse_rrt.systems import standard_cpp_systems
 # import random
@@ -74,9 +74,9 @@ def main(args):
         for iter in range(args.max_iter):
             planner.step(env, min_time_steps, max_time_steps, integration_step)
            
-            if iter%5000 == 0:
-                if planner.get_solution() is not None:
-                    print(time.time() - time0)
+            # if iter%5000 == 0:
+            #     if planner.get_solution() is not None:
+            #         print(time.time() - time0)
             if time.time() - time0 > args.max_time:
                 break
         solution = planner.get_solution()
@@ -107,13 +107,23 @@ def main(args):
 
             assert env_id is not None
             assert id_list is not None
-            table = load_occ_table(env_id)         
-            table.add(tuple(id_list))
-            save_occ_table(env_id, table)
+
+            saved = False
+            while not saved:
+                try:
+                    table = load_occ_table(env_id)         
+                    table.add(tuple(id_list))
+                    save_occ_table(env_id, table)
+                    saved = True
+                except EOFError:
+                    time.sleep(3)
+                    #pass
+            
             out_queue.put(1)
     ####################################################################################
     queue = Queue(1)
-    for i in range(args.N):
+    # for i in range(args.N):
+    for i in [args.N]:
         # load the obstacle by creating a new environment
         if args.env_name == 'quadrotor_obs':
             env_constr = standard_cpp_systems.RectangleObs3D
@@ -152,14 +162,22 @@ def main(args):
                 dir = args.path_folder+str(i+args.s)+'/'
                 if not os.path.exists(dir):
                     os.makedirs(dir)
-                path_file = dir+args.path_file+'_%d'%(j+args.sp) + ".pkl"
-                control_file = dir+args.control_file+'_%d'%(j+args.sp) + ".pkl"
-                cost_file = dir+args.cost_file+'_%d'%(j+args.sp) + ".pkl"
-                time_file = dir+args.time_file+'_%d'%(j+args.sp) + ".pkl"
-                sg_file = dir+args.sg_file+'_%d'%(j+args.sp)+".pkl"
-                p = Process(target=plan_one_path_sst, args=(env, start, end, queue, path_file, control_file, cost_file, time_file, i, id_list))
-                p.start()
-                p.join()
+                # path_file = dir+args.path_file+'_%d'%(j+args.sp) + ".pkl"
+                # control_file = dir+args.control_file+'_%d'%(j+args.sp) + ".pkl"
+                # cost_file = dir+args.cost_file+'_%d'%(j+args.sp) + ".pkl"
+                # time_file = dir+args.time_file+'_%d'%(j+args.sp) + ".pkl"
+                # sg_file = dir+args.sg_file+'_%d'%(j+args.sp)+".pkl"
+
+                path_id = "_".join(id_list.astype(str).tolist())
+                path_file = dir+args.path_file+path_id+ ".pkl"
+                control_file = dir+args.control_file + path_id + ".pkl"
+                cost_file = dir+args.cost_file + path_id + ".pkl"
+                time_file = dir+args.time_file + path_id + ".pkl"
+                sg_file = dir+args.sg_file + path_id +".pkl"
+                # p = Process(target=plan_one_path_sst, args=(env, start, end, queue, path_file, control_file, cost_file, time_file, i, id_list))
+                # p.start()
+                # p.join()
+                plan_one_path_sst(env, start, end, queue, path_file, control_file, cost_file, time_file, i, id_list)
                 res = queue.get()
                 print('obtained result:')
                 print(res)
@@ -180,7 +198,7 @@ if __name__ == "__main__":
     parser.add_argument('--s', type=int, default=0)
     parser.add_argument('--sp', type=int, default=0)
     parser.add_argument('--NP', type=int, default=2)
-    parser.add_argument('--max_iter', type=int, default=500000)
+    parser.add_argument('--max_iter', type=int, default=2000000)
     parser.add_argument('--path_folder', type=str, default='./trajectories/quadrotor_obs/')
     parser.add_argument('--path_file', type=str, default='path')
     parser.add_argument('--control_file', type=str, default='control')
