@@ -1,6 +1,6 @@
 import numpy as np
 import pickle
-from tools.voxel_dict import voxelize
+from pcd_tools.voxel_dict import voxelize
 
 def valid_state(state, obs_lists, width=1., radius=0.25):
     def centered_box_to_points_3d(center, size):

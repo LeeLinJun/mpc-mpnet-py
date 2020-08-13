@@ -21,7 +21,7 @@ import gc
 from multiprocessing import Process, Queue
 import quadrotor_obs_gen
 import quadrotor_sg_gen
-from tools.voxel_dict import load_occ_table, save_occ_table
+from pcd_tools.voxel_dict import load_occ_table, save_occ_table
 
 def main(args):
     if args.env_name == 'quadrotor_obs':
@@ -52,8 +52,9 @@ def main(args):
         #     pickle.dump(obs_list[i], file)
         #     file = open(args.path_folder+'obc_%d.pkl' % (i+args.s), 'wb')
         #     pickle.dump(obc_list[i], file)
-       
-    ####################################################################################
+        # exit(0)
+
+    ###################################################################################
 
     def plan_one_path_sst(env, start, end, out_queue, path_file, control_file, cost_file, time_file, env_id=None, id_list=None):        
         planner = _sst_module.SSTWrapper(

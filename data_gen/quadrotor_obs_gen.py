@@ -1,5 +1,5 @@
 import sys
-from tools.pcd_generation import rectangle_pcd_3d
+from pcd_tools.pcd_generation import rectangle_pcd_3d
 import numpy as np
 def obs_gen(N=None, N_obs=None, N_pc=1400, width=4):
     assert N is None
