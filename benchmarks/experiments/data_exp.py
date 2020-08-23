@@ -7,7 +7,7 @@ from pathlib import Path
 import importlib
 from mpnet.sst_envs.utils import load_data, get_obs
 
-def experiment(env_id, traj_id, verbose=False, system='acrobot_obs', params_module=None):
+def experiment(env_id, traj_id, verbose=False, system='acrobot_obs', params=None):
     print("env {}, traj {}".format(env_id, traj_id))
     data = load_data(system, env_id, traj_id)
     ref_path = data['path']

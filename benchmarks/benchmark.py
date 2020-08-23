@@ -48,18 +48,18 @@ def full_benchmark(num_env,
 @click.option('--env_id', default=0)
 @click.option('--traj_id', default=0)
 @click.option('--num_env', default=10)
-@click.option('--num_traj', default=200)
+@click.option('--num_traj', default=100)
 @click.option('--save', default=True)
 @click.option('--config', default='default')
 @click.option('--report', default=True)
 @click.option('--system', default="cartpole_obs")
-@click.option('--traj_id_offset', default=1800)
+@click.option('--traj_id_offset', default=900)
 @click.option('--experiment_type', default="shm")
 def main(full, env_id, traj_id, num_env, num_traj, save, config, report, system, traj_id_offset, experiment_type):
     if full is not True:
         experiment_func = importlib.import_module(".{}_exp".format(experiment_type), package="experiments").experiment
         experiment_func(env_id, traj_id,
-                        params=importlib.import_module('.cpp_dst_{}'.format(config), package=".params.{}".format(system)).get_params(), 
+                        params=importlib.import_module('.{}_{}'.format(experiment_type, config), package=".params.{}".format(system)).get_params(), 
                         system=system)
     else: 
         result = full_benchmark(num_env, 
@@ -68,7 +68,7 @@ def main(full, env_id, traj_id, num_env, num_traj, save, config, report, system,
                                 save=save,
                                 config=config,
                                 report=report, 
-                                params=importlib.import_module('.cpp_dst_{}'.format(config), package=".params.{}".format(system)).get_params(),
+                                params=importlib.import_module('.{}_{}'.format(experiment_type, config), package=".params.{}".format(system)).get_params(),
                                 system=system,
                                 traj_id_offset=traj_id_offset)
 

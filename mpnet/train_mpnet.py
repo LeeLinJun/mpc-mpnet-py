@@ -9,7 +9,7 @@ import click
 from training_utils.trainer import train_network
 
 @click.command()
-@click.option('--ae_output_size', default=32, help='ae_output_size')
+@click.option('--ae_output_size', default=64, help='ae_output_size')
 @click.option('--state_size', default=4, help='')
 @click.option('--lr', default=3e-4, help='learning_rate')
 @click.option('--epochs', default=1000, help='epochs')
@@ -17,9 +17,9 @@ from training_utils.trainer import train_network
 @click.option('--system_env', default='sst_envs')
 @click.option('--system', default='acrobot_obs')
 @click.option('--setup', default='default_norm')
-@click.option('--loss_type', default='l1_loss')
+@click.option('--loss_type', default='mse_loss')
 @click.option('--lr_step_size', default=100)
-@click.option('--aug', default=True)
+@click.option('--aug', default=False)
 @click.option('--network_name', default="mpnet")
 def main(ae_output_size, state_size, lr, epochs, batch, 
     system_env, system, setup, loss_type, lr_step_size, aug, network_name):
@@ -30,14 +30,28 @@ def main(ae_output_size, state_size, lr, epochs, batch,
                 from networks.mpnet_cartpole_obs import MPNet
             elif network_name == 'mpnet_branch':
                 from networks.mpnet_cartpole_obs_branch import MPNet
+            state_dim = 4
+            in_channels = 1
 
         elif system == 'acrobot_obs':
             from networks.mpnet_acrobot_obs import MPNet
+            state_dim = 4
+            in_channels = 1
+        elif system == 'quadrotor_obs':
+            from networks.mpnet_quadrotor_obs import MPNet
+            state_dim = 13
+            in_channels = 32
+        elif system == 'car_obs':
+            from networks.mpnet_car_obs import MPNet
+            state_dim = 3
+            in_channels = 1
+
+
     except:
         print("Unrecognized model name")
         raise
 
-    mpnet = MPNet(ae_input_size=32, ae_output_size=ae_output_size, in_channels=1, state_size=4)
+    mpnet = MPNet(ae_input_size=32, ae_output_size=ae_output_size, in_channels=in_channels, state_size=state_dim)
 
     data_loaders = get_loader(system_env, system, batch_size=batch, setup=setup)
 

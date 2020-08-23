@@ -10,13 +10,13 @@ import copy
 from dataset.dataset import get_loader
 from termcolor import colored
 
-def export(net, setup, system_env, system, exported_path="exported/output/net.pt"):
+def export(net, setup, system_env, system, exported_path="exported/output/net.pt", batch_size=1):
     print(colored("Trying to export to {}".format(exported_path), "red"))
     env_vox = torch.from_numpy(np.load('{}/data/{}_env_vox.npy'.format(system_env, system))).float()
     train_loader, test_loader = get_loader(system_env, system, batch_size=1, setup=setup)
     
-    env_input = env_vox[train_loader.dataset[0:1][0][0:1, 0].long()].cuda()
-    state_input = train_loader.dataset[0:1][0][0:1, 1:].cuda()
+    env_input = env_vox[train_loader.dataset[0:batch_size][0][:, 0].long()].cuda()
+    state_input = train_loader.dataset[0:batch_size][0][:, 1:].cuda()
     
     eval_net = copy.deepcopy(net)
     eval_net.eval()

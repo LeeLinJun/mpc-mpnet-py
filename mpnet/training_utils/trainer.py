@@ -20,11 +20,11 @@ def train_network(network, data_loaders, network_name="mpnet",
     if torch.cuda.is_available():
         network = network.cuda()
         env_vox = env_vox.cuda()
+    # optimizer = torch.optim.Adagrad(network.parameters(), lr=lr)
     optimizer = torch.optim.Adam(network.parameters(), lr=lr)
+
     if using_step_lr:
         scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
-    eval_loss = 0
-    train_loss = 0
     logger = Logger("output/{}/{}/{}/".format(system, setup, network_name))
 
     get_loss = lambda output, label:eval("torch.nn.functional."+loss_type)(output, label)
@@ -48,20 +48,17 @@ def train_network(network, data_loaders, network_name="mpnet",
                 ## execute
                 optimizer.zero_grad()
                 output = network(inputs, envs)
-
                 loss_tensor = torch.zeros(label.size(1))
                 for dim_i in range(label.size(1)):
                     loss_tensor[dim_i] = get_loss(output[:, dim_i], label[:, dim_i]) #* loss_coeff[dim_i]
                 loss = torch.sum(loss_tensor)
-                
                 loss.backward()
-                train_loss_list.append(loss.item())
+                train_loss_list.append(loss_tensor.detach().cpu().numpy())
                 optimizer.step()
-            train_loss = np.mean(train_loss_list)
-            
-            logger.train_step(loss, ep)
+            train_loss_list = np.array(train_loss_list)
+            logger.train_step(train_loss_list.reshape(-1).mean(), ep, train_loss_list.mean(axis=0))
             if using_step_lr:
-                scheduler.step(ep)
+                scheduler.step()
             network.eval()
             for data, label in test_loader:
                 eval_loss_list = []
@@ -76,11 +73,12 @@ def train_network(network, data_loaders, network_name="mpnet",
                     for dim_i in range(label.size(1)):
                         loss_tensor[dim_i] = get_loss(output[:, dim_i], label[:, dim_i]) #* loss_coeff[dim_i]
                     loss = torch.sum(loss_tensor)
-                    eval_loss_list.append(loss.item())
-            eval_loss = np.mean(eval_loss_list)
-            pbar.set_postfix({'eval_loss': '{0:1.5f}'.format(eval_loss),
-                              'train_loss': '{0:1.5f}'.format(train_loss),})
-            logger.eval_step(eval_loss, ep)
+                    eval_loss_list.append(loss_tensor.detach().cpu().numpy())
+            eval_loss_list = np.array(eval_loss_list)
+            logger.eval_step(eval_loss_list.mean(), ep)
+
+            pbar.set_postfix({'eval_loss': '{0:1.5f}'.format(eval_loss_list.reshape(-1).mean()),
+                              'train_loss': '{0:1.5f}'.format(train_loss_list.reshape(-1).mean()),})
 
             if ep % weight_save_epochs == 0:
                 Path("output/{}/{}/{}".format(system, setup, network_name)).mkdir(parents=True, exist_ok=True)

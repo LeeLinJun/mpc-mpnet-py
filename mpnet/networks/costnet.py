@@ -18,7 +18,7 @@ class CostNet(nn.Module):
         else:
             self.encoder = encoder
         self.mlp = PNet(input_size=ae_output_size+state_size * 2,
-                         output_size=1)
+                        output_size=1)
         self.aug_ratio = 0.3
     
     def forward(self, x, obs):
@@ -30,11 +30,8 @@ class CostNet(nn.Module):
         return self.mlp(z_x)
 
     def aug(self, data, label, aug_gt=10, noise=[1, 1, 1, 1, 1e-2, 1e-2, 1e-2, 1e-2]):
-        
         num_aug_sample = int(data.size(0) * self.aug_ratio)
-        
         fake_data = data[:num_aug_sample, :].clone()
-
         fake_data[:num_aug_sample, 1:] = torch.empty(num_aug_sample, data.size(1) -1 ).uniform_(-1, 1) * torch.tensor(noise)
         fake_label = torch.ones(num_aug_sample, 1) * aug_gt
 

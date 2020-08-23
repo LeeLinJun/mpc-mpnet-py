@@ -1,6 +1,6 @@
 #! /bin/bash
 source activate linjun
-python exported/export_mpnet.py --system acrobot_obs
+# python exported/export_mpnet.py --system acrobot_obs
 # python exported/export_cost_to_go.py --system acrobot_obs
 # python exported/export_cost_so_far.py --system acrobot_obs
 # python exported/export_cost.py --system acrobot_obs
@@ -39,3 +39,12 @@ python exported/export_mpnet.py --system acrobot_obs
 
 # python exported/export_cost_to_go.py --system cartpole_obs --ep 1000 --network_type cost_to_go_obs --outputfn cost_to_go_obs
 # python exported/export_cost_to_go.py --system cartpole_obs --ep 1000 --network_type cost_to_go_aug --outputfn cost_to_go_aug
+
+python exported/export_mpnet.py --system quadrotor_obs --ep 75 --outputfn mpnet.pt --batch_size 5
+python exported/export_cost_to_go.py --system quadrotor_obs  --ep 1000
+
+# python exported/export_mpnet.py --system quadrotor_obs --ep 1000 --outputfn mpnet_1k_l1_adagrad.pt --network_name mpnet_l1_adagrad
+
+# python exported/export_mpnet_external_small_model_car_step_500.py --system car_obs --ep 950 --outputfn mpnet_10k_external_small_model_step_500.pt
+
+# python exported/export_cost_to_go.py --system car_obs  --ep 1000
