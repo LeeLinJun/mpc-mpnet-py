@@ -56,12 +56,12 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
                 break    
     toc = time.perf_counter()
 
-    costs = solution[2].sum() if solution is not None else data_cost
+    costs = solution[2].sum() if solution is not None else np.inf
     result = {
         'env_id': env_id,
         'traj_id': traj_id,
         'planning_time': toc-tic,
-        'successful': True,
+        'successful': solution is not None,
         'costs': costs
     }
     

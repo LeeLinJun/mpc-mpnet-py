@@ -14,9 +14,9 @@ def get_params():
         'mu_u': [-10, 0, 0, 0],
         'sigma_u': [15, 1, 1, 1],
 
-        'mu_t': 0.5,
-        'sigma_t': 1,
-        't_max': 2,
+        'mu_t': 0.25,
+        'sigma_t': 0.25,
+        't_max': 1,
 
         'verbose':  False,#True,#
         'step_size': 1,
@@ -31,10 +31,10 @@ def get_params():
         "hybrid": False,
         "hybrid_p": 0.0,
 
-        "cost_samples": 5,
-        "mpnet_weight_path": "mpnet/exported/output/quadrotor_obs/mpnet.pt",
+        "cost_samples": 1,
+        "mpnet_weight_path": "mpnet/exported/output/quadrotor_obs/mpnet_b1.pt",
         "cost_predictor_weight_path": "",
-        "cost_to_go_predictor_weight_path": "mpnet/exported/output/quadrotor_obs/cost_to_go.pt",
+        "cost_to_go_predictor_weight_path": "",
 
         "refine": False,
         "using_one_step_cost": False,
