@@ -5,7 +5,6 @@ from tqdm import tqdm
 
 import sys
 sys.path.append('/media/arclabdl1/HD1/Linjun/mpc-mpnet-py/deps/sparse_rrt-1')
-
 from sparse_rrt import _deep_smp_module
 
 
@@ -24,14 +23,16 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
     obc = env_vox[env_id]
     # print(obc.reshape(-1), obc.reshape(-1).shape)
     # print(obs_list)
-    number_of_iterations = params['number_of_iterations'] #3000000# 
+    number_of_iterations = params['number_of_iterations']  # 3000000#
     min_time_steps = params['min_time_steps'] if 'min_time_steps' in params else 0
     max_time_steps = params['max_time_steps'] if 'min_time_steps' in params else 800
     integration_step = params['dt']
     planner = _deep_smp_module.DSSTMPCWrapper(system_type=system,
-                                              start_state=np.array(data['start_goal'][0]),
-                                              #goal_state=np.array(ref_path[-1]),
-                                              goal_state=np.array(data['start_goal'][1]),
+                                              start_state=np.array(
+                                                  data['start_goal'][0]),
+                                              # goal_state=np.array(ref_path[-1]),
+                                              goal_state=np.array(
+                                                  data['start_goal'][1]),
                                               goal_radius=params['goal_radius'],
                                               random_seed=0,
                                               sst_delta_near=params['sst_delta_near'],
@@ -39,14 +40,18 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
                                               obs_list=obs_list,
                                               width=params['width'],
                                               verbose=params['verbose'],
-                                              mpnet_weight_path=params['mpnet_weight_path'], 
+                                              mpnet_weight_path=params['mpnet_weight_path'],
                                               cost_predictor_weight_path=params['cost_predictor_weight_path'],
-                                              cost_to_go_predictor_weight_path=params['cost_to_go_predictor_weight_path'],
+                                              cost_to_go_predictor_weight_path=params[
+                                                  'cost_to_go_predictor_weight_path'],
                                               num_sample=params['cost_samples'],
                                               shm_max_step=params['shm_max_steps'],
-                                              np=params['n_problem'], ns=params['n_sample'], nt=params['n_t'], ne=params['n_elite'], max_it=params['max_it'],
-                                              converge_r=params['converge_r'], mu_u=params['mu_u'], std_u=params['sigma_u'], mu_t=params['mu_t'], 
-                                              std_t=params['sigma_t'], t_max=params['t_max'], step_size=params['step_size'], integration_step=params['dt'], 
+                                              np=params['n_problem'], ns=params['n_sample'], nt=params[
+                                                  'n_t'], ne=params['n_elite'], max_it=params['max_it'],
+                                              converge_r=params['converge_r'], mu_u=params[
+                                                  'mu_u'], std_u=params['sigma_u'], mu_t=params['mu_t'],
+                                              std_t=params['sigma_t'], t_max=params['t_max'], step_size=params[
+                                                  'step_size'], integration_step=params['dt'],
                                               device_id=params['device_id'], refine_lr=params['refine_lr'],
                                               weights_array=params['weights_array'],
                                               obs_voxel_array=obc.reshape(-1)
@@ -55,18 +60,19 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
 
     data_cost = np.sum(data['cost'])
     # th = 1.2 * data_cost
-    ## start experiment
+    # start experiment
     tic = time.perf_counter()
     for iteration in tqdm(range(number_of_iterations)):
-        planner.deep_smp_step(params['refine'], 
+        planner.deep_smp_step(params['refine'],
                               refine_threshold=params['refine_threshold'],
                               using_one_step_cost=params['using_one_step_cost'],
                               cost_reselection=params['cost_reselection'],
                               goal_bias=params['goal_bias'],
                               NP=params['n_problem'])
         solution = planner.get_solution()
-        if solution is not None or time.perf_counter()-tic > params['max_planning_time']: #and np.sum(solution[2]) < th:
-            break    
+        # and np.sum(solution[2]) < th:
+        if solution is not None or time.perf_counter()-tic > params['max_planning_time']:
+            break
     toc = time.perf_counter()
     # if solution is not None:
     #     print(solution[0], solution[2])
@@ -77,12 +83,13 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
         'traj_id': traj_id,
         'planning_time': toc-tic,
         'successful': solution is not None,
-        'costs': costs
+        'costs': costs,
+        'traj': solution[0]
     }
-    
+
     print("\t{}, time: {} seconds, {}(ref:{}) costs".format(
-            result['successful'],
-            result['planning_time'],
-            result['costs'],
-            np.sum(data['cost'])))
+        result['successful'],
+        result['planning_time'],
+        result['costs'],
+        np.sum(data['cost'])))
     return result

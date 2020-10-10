@@ -1,8 +1,9 @@
 import numpy as np
 
+
 def get_params():
     params = {
-        'solver_type' : "cem",
+        'solver_type': "cem",
         'n_problem': 1,
         'n_sample': 64,
         'n_elite': 4,
@@ -16,7 +17,7 @@ def get_params():
         'mu_t': 2e-1,
         'sigma_t': 0.8,
         't_max': 2,
-        'verbose': False,#True, #
+        'verbose': False,  # True, #
         'step_size': 0.75,
 
         "goal_radius": 2,
@@ -28,8 +29,8 @@ def get_params():
         "hybrid": False,
         "hybrid_p": 0.,
         "cost_samples": 1,
-        "mpnet_weight_path":"mpnet/exported/output/acrobot_obs/mpnet_10k.pt",
-    
+        "mpnet_weight_path": "mpnet/exported/output/acrobot_obs/mpnet_10k.pt",
+
         "cost_predictor_weight_path": "mpnet/exported/output/acrobot_obs/cost_10k.pt",
         "cost_to_go_predictor_weight_path": "mpnet/exported/output/acrobot_obs/cost_to_go_10k.pt",
 
@@ -47,4 +48,3 @@ def get_params():
     }
 
     return params
-    

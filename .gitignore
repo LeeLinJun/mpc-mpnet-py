@@ -14,3 +14,6 @@
 **.gif
 *.zip
 data_gen/trajectories
+
+mpnet/exported
+mpc-mpnet.code-workspace

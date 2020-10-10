@@ -2,6 +2,7 @@ import numpy as np
 
 def get_params():
     params = {
+        'solver_type': "cem",
         'n_problem': 1,
         'n_sample': 32,
         'n_elite': 8,
@@ -11,14 +12,14 @@ def get_params():
 
         'dt': 2e-3,
 
-        'mu_u': 0,
-        'sigma_u': 400,
+        'mu_u': [0],
+        'sigma_u': [400],
 
         'mu_t': 0.5,
         'sigma_t': 0.5,
         't_max': 1,
 
-        'verbose':  False,#True,#
+        'verbose':  False,  # True,#
         'step_size': 1,
 
         "goal_radius": 1.5,
@@ -54,6 +55,7 @@ def get_params():
         "number_of_iterations": 100000,
         "weights_array": [1, 1, 1, 0.5],
         'max_planning_time': 50,
+        'shm_max_steps': 40
     }
 
     cuda_batch_params = {
@@ -67,8 +69,8 @@ def get_params():
 
         'dt': 2e-3,
 
-        'mu_u': 0,
-        'sigma_u': 400,
+        'mu_u': [0],
+        'sigma_u': [400],
 
         'mu_t': 0.4,
         'sigma_t': 0.5,
@@ -108,7 +110,7 @@ def get_params():
         "number_of_iterations": 40000,
         "weights_array": [1, 1, 1, .5],
         'max_planning_time': 50,
-
+        'shm_max_steps': 40
     }
 
     return cuda_batch_params
