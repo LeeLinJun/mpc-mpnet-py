@@ -38,7 +38,7 @@ def get_params():
         "using_one_step_cost": False,
         "refine_lr": 0,
         "refine_threshold": 0,
-        "device_id": "cuda:2",
+        "device_id": "cuda:3",
 
         "cost_reselection": False,
         "number_of_iterations": 40000,

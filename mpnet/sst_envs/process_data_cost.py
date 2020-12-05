@@ -299,7 +299,7 @@ def path_to_tensor_forward(env_id,
 @click.command()
 @click.option('--num', default=10)
 @click.option('--system', default='quadrotor_obs')
-@click.option('--traj_num', default=1000)
+@click.option('--traj_num', default=900)
 @click.option('--setup', default='default_norm')
 @click.option('--normalize', default=True)
 @click.option('--interpolate', default=False)
