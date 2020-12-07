@@ -8,7 +8,7 @@ def get_params():
         'n_elite': 2,
         'n_t': 1,
         'max_it': 5,
-        'converge_r': 1e-1,
+        'converge_r': 1e-3,
 
         'dt': 2e-3,
 
@@ -51,8 +51,8 @@ def get_params():
 
         "cost_reselection": False,
         "number_of_iterations": 40000,
-        "weights_array": [1, 1, 1, .5],
+        "weights_array": [1, 0.5, 1, .5],
         'max_planning_time': 50,
-        'shm_max_steps': 40
-    }
+        "shm_max_steps": 40
+        }
     return params
