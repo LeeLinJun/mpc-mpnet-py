@@ -1,0 +1,1 @@
+python process_data_cost.py --num 10 --system quadrotor_obs --setup d_n_aug_itp --interpolate True --interpolate_steps 50

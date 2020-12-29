@@ -41,9 +41,11 @@ source activate linjun
 # python exported/export_cost_to_go.py --system cartpole_obs --ep 1000 --network_type cost_to_go_aug --outputfn cost_to_go_aug
 
 
-python exported/export_mpnet.py --system quadrotor_obs --ep 75 --outputfn mpnet_b1.pt --batch_size 1
-python exported/export_mpnet.py --system quadrotor_obs --ep 75 --outputfn mpnet.pt --batch_size 5
-python exported/export_cost_to_go.py --system quadrotor_obs  --ep 1000
+# python exported/export_mpnet.py --system quadrotor_obs --ep 75 --outputfn mpnet_b1.pt --batch_size 1
+# python exported/export_mpnet.py --system quadrotor_obs --ep 75 --outputfn mpnet.pt --batch_size 5
+# python exported/export_cost_to_go.py --system quadrotor_obs  --ep 1000
+python exported/export_mpnet.py --system quadrotor_obs --ep 75 --outputfn mpnet-tree-batch-128.pt --batch_size 128
+
 
 # python exported/export_mpnet.py --system quadrotor_obs --ep 1000 --outputfn mpnet_1k_l1_adagrad.pt --network_name mpnet_l1_adagrad
 

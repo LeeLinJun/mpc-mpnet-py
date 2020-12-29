@@ -1,8 +1,8 @@
 import numpy as np
 
 
-class QuadrotorVec:
-    def __init__(self, svc=None, env=None, verbose=True):
+class Quadrotor:
+    def __init__(self, svc=None, env=None, verbose=False):
         self.MIN_C1 = -15.
         self.MAX_C1 = 0.
         self.MIN_C = -1.
@@ -125,6 +125,7 @@ class QuadrotorVec:
             q[:, 10:13] = np.clip(q[:, 10:13], self.MIN_W, self.MAX_W)
             q[:, 3:7] = self.enforce_bounds_quaternion_vec(q[:, 3:7])
         return q
+
 
 
 if __name__ == '__main__':

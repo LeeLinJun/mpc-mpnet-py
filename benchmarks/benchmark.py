@@ -35,14 +35,17 @@ def full_benchmark(num_env,
                 planning_time[env_id, traj_id] = result['planning_time']
                 costs[env_id, traj_id] = result['costs']
             if save:
-                Path("results/cpp_full/{}/{}/".format(system, config)
-                     ).mkdir(parents=True, exist_ok=True)
-                np.save('results/cpp_full/{}/{}/sr_{}_{}.npy'.format(system,
-                                                                     config, num_env, num_traj), sr)
-                np.save('results/cpp_full/{}/{}/time_{}_{}.npy'.format(system,
-                                                                       config, num_env, num_traj), planning_time)
-                np.save('results/cpp_full/{}/{}/costs_{}_{}.npy'.format(system,
-                                                                        config, num_env, num_traj), costs)
+                Path("results/{}/{}/{}/".format(
+                    experiment_type, system, config)
+                ).mkdir(parents=True, exist_ok=True)
+                np.save('results/{}/{}/{}/sr_{}_{}.npy'.format(
+                    experiment_type, system, config, num_env, num_traj), sr)
+                np.save('results/{}/{}/{}/time_{}_{}.npy'.format(
+                    experiment_type, system, config, num_env, num_traj),
+                    planning_time)
+                np.save('results/{}/{}/{}/costs_{}_{}.npy'.format(
+                    experiment_type, system, config, num_env, num_traj),
+                    costs)
             if report:
                 sr_list = sr.reshape(-1)[:(num_traj*env_id+traj_id+1)]
                 mask = sr_list > 0
