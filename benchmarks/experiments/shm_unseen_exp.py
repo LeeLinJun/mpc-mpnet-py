@@ -20,6 +20,7 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
     start_goal = data['start_goal']
     # print(start_goal)
     env_vox = np.load('mpnet/sst_envs/data/{}_env_vox_unseen.npy'.format(system))
+    # print(env_vox.shape)
     obc = env_vox[env_id]
     # print(obc.reshape(-1), obc.reshape(-1).shape)
     # print(obs_list)
@@ -63,12 +64,17 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
     # start experiment
     tic = time.perf_counter()
     for iteration in tqdm(range(number_of_iterations)):
-        planner.deep_smp_step(params['refine'],
-                              refine_threshold=params['refine_threshold'],
-                              using_one_step_cost=params['using_one_step_cost'],
-                              cost_reselection=params['cost_reselection'],
-                              goal_bias=params['goal_bias'],
-                              NP=params['n_problem'])
+        if params['hybrid']:
+            if np.random.rand() < params['hybrid_p']:
+                # planner.step(min_time_steps, max_time_steps, integration_step)
+                planner.mpc_step(integration_step)
+            else:
+                planner.deep_smp_step(params['refine'],
+                                      refine_threshold=params['refine_threshold'],
+                                      using_one_step_cost=params['using_one_step_cost'],
+                                      cost_reselection=params['cost_reselection'],
+                                      goal_bias=params['goal_bias'],
+                                      NP=params['n_problem'])
         solution = planner.get_solution()
         # and np.sum(solution[2]) < th:
         if solution is not None or time.perf_counter()-tic > params['max_planning_time']:

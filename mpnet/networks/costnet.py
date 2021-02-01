@@ -34,7 +34,7 @@ class CostNet(nn.Module):
     def aug(self, data, label, aug_gt=10, noise=[1, 1, 1, 1, 1e-2, 1e-2, 1e-2, 1e-2]):
         num_aug_sample = int(data.size(0) * self.aug_ratio)
         fake_data = data[:num_aug_sample, :].clone()
-        fake_data[:num_aug_sample, 1:] = torch.empty(num_aug_sample, data.size(1) -1).uniform_(-1, 1) * torch.tensor(noise)
+        fake_data[:num_aug_sample, 1:] = torch.empty(num_aug_sample, data.size(1) - 1).uniform_(-1, 1) * torch.tensor(noise)
         fake_label = torch.ones(num_aug_sample, 1) * aug_gt
 
         # print(data.size(), fake_data.size())

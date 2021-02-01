@@ -1,22 +1,20 @@
 from dataset.dataset import get_loader_cost
 from networks.costnet import CostNet
 import torch
-
-import numpy as np
+# import numpy as np
 import click
-
 from training_utils.trainer import train_network
 
 @click.command()
 @click.option('--ae_output_size', default=32, help='ae_output_size')
 @click.option('--state_size', default=4, help='')
-@click.option('--lr', default=1e-3, help='learning_rate')
+@click.option('--lr', default=3e-4, help='learning_rate')
 @click.option('--epochs', default=10000, help='epochs')
-@click.option('--batch', default=128, help='batch')
+@click.option('--batch', default=2048, help='batch')
 @click.option('--system_env', default='sst_envs')
 @click.option('--system', default='acrobot_obs')
 @click.option('--setup', default='default_norm')
-@click.option('--loss_type', default='l1_loss')
+@click.option('--loss_type', default='smooth_l1_loss')
 @click.option('--load_from', default=None, type=str)
 @click.option('--network_type', default='cost_to_go')
 @click.option('--data_type', default='path_data')
@@ -35,7 +33,7 @@ def main(ae_output_size, state_size, lr, epochs, batch,
 
         costnet = CostNet(ae_input_size=32, ae_output_size=32, in_channels=1, state_size=state_size, encoder=mpnet.encoder)
     else:
-        if system in ['car_obs', 'cartpole_obs']:
+        if system in ['car_obs', 'cartpole_obs', 'acrobot_obs']:
             from networks.mpnet_car_obs import MPNet
             channel_size = 1
             print("using channel size 1")
@@ -52,6 +50,8 @@ def main(ae_output_size, state_size, lr, epochs, batch,
             mpnet.load_state_dict(torch.load('output/{}/{}/{}/ep10000.pth'.format(system, setup, load_from)))
 
         costnet = CostNet(ae_input_size=32, ae_output_size=ae_output_size, in_channels=channel_size, state_size=state_size, encoder=None)
+        # costnet.load_state_dict(torch.load('output/{}/{}/cost_to_go/ep{}.pth'.format(system, setup, 150)))
+
     # for param in costnet.encoder.parameters():
     #     param.requires_grad = False
 

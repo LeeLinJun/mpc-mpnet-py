@@ -1,13 +1,13 @@
 import torch
-import torch.nn.functional as F
+# import torch.nn.functional as F
 from torch.optim.lr_scheduler import StepLR
 
 from .logger import Logger
 import numpy as np
-import click
+# import click
 from tqdm import tqdm
 from pathlib import Path
-import importlib
+# import importlib
 
 def train_network(network, data_loaders, network_name="mpnet",
                   lr=3e-4, epochs=1000, batch=128,
@@ -21,6 +21,7 @@ def train_network(network, data_loaders, network_name="mpnet",
         network = network.cuda()
         env_vox = env_vox.cuda()
 
+    # optimizer = torch.optim.SGD(network.parameters(), lr=lr, momentum=0.9, weight_decay=0.0001, nesterov=True)
     # optimizer = torch.optim.Adagrad(network.parameters(), lr=lr)
     optimizer = torch.optim.Adam(network.parameters(), lr=lr)
 
@@ -28,7 +29,8 @@ def train_network(network, data_loaders, network_name="mpnet",
         scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
     logger = Logger("output/{}/{}/{}/".format(system, setup, network_name))
 
-    def get_loss(output, label): return eval("torch.nn.functional."+loss_type)(output, label)
+    def get_loss(output, label): 
+        return eval("torch.nn.functional."+loss_type)(output, label)
 
     # loss_coeff = np.array([15, 20., 15.7, 2.])
     # loss_coeff /= np.sum(loss_coeff)

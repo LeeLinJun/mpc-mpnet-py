@@ -34,8 +34,8 @@ def post_propagate(path_dict, system, dt=2e-3, interp_freq=1):
     post_state = ref_path[0].copy().astype(np.float)
     post_propagate_path = [post_state.copy()]
     counter = 0
+    post_propagate_cost = []
     cost = 0
-    post_propagate_cost = [cost]
 
     for i in range(ref_control.shape[0]):
         num_steps = int(ref_time[i] / dt)
@@ -47,11 +47,13 @@ def post_propagate(path_dict, system, dt=2e-3, interp_freq=1):
             counter += 1
             cost += dt
             if counter % interp_freq == 0:
-                counter = 0
                 post_propagate_path.append(post_state.copy())
                 post_propagate_cost.append(cost)
-    post_propagate_cost_to_go = np.sum(ref_time) - np.array(post_propagate_cost)
-    return np.array(post_propagate_path), post_propagate_cost_to_go
+                cost = 0
+                counter = 0
+    post_propagate_path.append(post_state.copy())
+    post_propagate_cost.append(cost)
+    return np.array(post_propagate_path), np.array(post_propagate_cost)
 
 
 def path_to_tensor_forward(env_id,
@@ -65,9 +67,10 @@ def path_to_tensor_forward(env_id,
     """
     [env_id, state, goal]
     """
+    # print(goal_aug)
     if interpolate:
-        path, costs_to_go = post_propagate(path_dict, system, step_size, interp_freq=interpolate_steps)
-    # print(np.sum(path_dict['cost']), path_dict['cost'], costs)
+        path, costs = post_propagate(path_dict, system, step_size, interp_freq=interpolate_steps)
+    # print(np.sum(path_dict['cost']), costs, np.sum(costs))
 
     # start_goal = path_dict['start_goal']
     n_nodes = path.shape[0]
@@ -83,14 +86,14 @@ def path_to_tensor_forward(env_id,
 
     # start to first path node
     for i_start in range(n_nodes-1):
-        goal_ind_list = range(i_start+1, n_nodes) if goal_aug is True else [n_nodes - 1]
+        goal_ind_list = range(i_start+1, n_nodes) if goal_aug else [n_nodes - 1]
         for i_goal in goal_ind_list:
             data.append(np.concatenate(([env_id],
                                         path[i_start, :],
                                         path[i_goal, :])))
             gt.append(path[i_start+1, :])
-            c2g.append(costs_to_go[i_start])
-    # print(c2g, np.sum(path_dict['cost']))
+            c2g.append(np.sum(costs[i_start:i_goal+1]))
+    # print(np.max(c2g), np.sum(path_dict['cost']))
 
     data = np.array(data)
     gt = np.array(gt)
@@ -139,6 +142,7 @@ def path_to_tensor_forward(env_id,
 @click.option('--goal_aug', default=False)
 def main(num, system, traj_num, setup, normalize, interpolate,
          interpolate_steps, step_size, goal_aug):
+    print("goal_aug is {}".format(goal_aug))
     print("Interpolating is set to {}, step_size is {} and interpolate to {} steps".format(interpolate, step_size, interpolate_steps))
     data, gt, cost_to_go = [], [], []
     for env_id in range(num):
@@ -155,6 +159,7 @@ def main(num, system, traj_num, setup, normalize, interpolate,
                                                 step_size=step_size,
                                                 goal_aug=goal_aug)
             d, g, c2g = data_lists
+            # print(c2g, np.sum(path_dict['cost']))
             data.append(d)
             gt.append(g)
             cost_to_go.append(c2g) 
@@ -162,6 +167,8 @@ def main(num, system, traj_num, setup, normalize, interpolate,
     gt = np.concatenate(gt, axis=0)
     cost_to_go = np.concatenate(cost_to_go, axis=0)
     print([d.shape for d in [data, gt, cost_to_go]])
+
+    # print(cost_to_go[:100])
 
     Path("data/{}".format(setup)).mkdir(parents=True, exist_ok=True)
     np.save('data/{}/{}_path_data.npy'.format(setup, system), data)

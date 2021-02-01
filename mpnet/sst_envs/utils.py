@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pickle
 import numpy as np
 
+num_unseen_envs = 2
 
 def load_data(model, env, traj_id):
     if model == 'acrobot_obs':
@@ -53,9 +54,9 @@ def get_obs_unseen(model, filetype='obs'):
 
     def loader(model, env_id, filetype):
         return pickle.load(open(filepath(model, env_id, filetype), "rb"))
-    #obs_list = [loader(model, env_id, "obs") for env_id in range(10)]
+    #  obs_list = [loader(model, env_id, "obs") for env_id in range(10)]
     obs_list = np.array(
-        [loader(model, env_id+10, "obs").reshape(-1, 2) for env_id in range(2)])
+        [loader(model, env_id+10, "obs").reshape(-1, 2) for env_id in range(3 if model == 'acrobot_obs_backup' else num_unseen_envs)])
     return obs_list
 
 
@@ -79,7 +80,7 @@ def get_obs_3d_unseen(model='quadrotor_obs', filetype='obs'):
         return pickle.load(open(filepath(model, env_id, filetype), "rb"))
     #obs_list = [loader(model, env_id, "obs") for env_id in range(10)]
     obs_list = np.array(
-        [loader(model, env_id+10, "obs").reshape(-1, 3) for env_id in range(2)])
+        [loader(model, env_id+10, "obs").reshape(-1, 3) for env_id in range(num_unseen_envs)])
     return obs_list
 
 

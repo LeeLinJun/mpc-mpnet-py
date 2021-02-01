@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 from obs_2d import pcd_to_voxel2d
 from obs_3d import pcd_to_voxel3d
+from utils import num_unseen_envs
 
 
 def filepath(system, env_id, filetype):
@@ -22,18 +23,19 @@ def process_and_save(system, obc_list, voxel_size=[32, 32], reshape_size=[-1, 1,
 
 def gen2d(system):
     if system == "acrobot_obs":
-        system_path = "acrobot_obs_backup"
+        system_path = "acrobot_obs_backup_corrected"
     else:
         system_path = system
     # 10 envs
-    process_and_save(system=system_path,
+    process_and_save(system=system,
                      obc_list=np.array([loader(system_path, env_id, "obc").reshape(-1, 2) for env_id in range(10)]),
                      voxel_size=[32, 32],
                      reshape_size=[-1, 1, 32, 32],
                      unseen=False)
     # unseen 2 envs
-    process_and_save(system=system_path,
-                     obc_list=np.array([loader(system_path, env_id+10, "obc").reshape(-1, 2) for env_id in range(2)]),
+    process_and_save(system=system,
+                     obc_list=np.array([loader(system_path, env_id+10, "obc").reshape(-1, 2) for env_id in range(
+                         3 if system == 'acrobot_obs' else num_unseen_envs)]),
                      voxel_size=[32, 32],
                      reshape_size=[-1, 1, 32, 32],
                      unseen=True)
@@ -51,7 +53,7 @@ def gen3d(system):
 
     # unseen 2 envs
     process_and_save(system=system_path,
-                     obc_list=np.array([loader(system_path, env_id+10, "obc").reshape(-1, 3) for env_id in range(2)]),
+                     obc_list=np.array([loader(system_path, env_id+10, "obc").reshape(-1, 3) for env_id in range(num_unseen_envs)]),
                      voxel_size=[32, 32, 32],
                      reshape_size=[-1, 32, 32, 32],
                      dim=3,

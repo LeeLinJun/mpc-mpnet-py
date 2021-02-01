@@ -10,7 +10,8 @@ import sys
 sys.path.append('/media/arclabdl1/HD1/Linjun/mpc-mpnet-py')
 
 
-def full_benchmark(num_env,
+def full_benchmark(start_env,
+                   num_env,
                    num_traj,
                    experiment_type,
                    save=True,
@@ -29,7 +30,7 @@ def full_benchmark(num_env,
             experiment_func = importlib.import_module(".{}_exp".format(
                 experiment_type), package="experiments").experiment
             result = experiment_func(
-                env_id, traj_id + traj_id_offset, params=params, system=system)
+                env_id + start_env, traj_id + traj_id_offset, params=params, system=system)
             sr[env_id, traj_id] = result['successful']
             if result['successful']:
                 planning_time[env_id, traj_id] = result['planning_time']
@@ -83,7 +84,8 @@ def main(full, env_id, traj_id, num_env, num_traj, save, config, report, system,
             system=system, experiment_type=experiment_type, env_id=env_id, traj_id=traj_id), result['traj'])
 
     else:
-        result = full_benchmark(num_env,
+        result = full_benchmark(env_id,
+                                num_env,
                                 num_traj,
                                 experiment_type,
                                 save=save,
