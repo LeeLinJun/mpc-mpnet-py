@@ -12,9 +12,9 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
     print("env {}, traj {}".format(env_id, traj_id))
     # print(params)
     if system in ['cartpole_obs', 'acrobot_obs', 'car_obs']:
-        obs_list = get_obs(system, env_id)[env_id].reshape(-1, 2)
+        obs_list = get_obs(system)[env_id].reshape(-1, 2)
     elif system in ['quadrotor_obs']:
-        obs_list = get_obs_3d(system, env_id)[env_id].reshape(-1, 3)
+        obs_list = get_obs_3d(system)[env_id].reshape(-1, 3)
     data = load_data(system, env_id, traj_id)
     ref_path = data['path']
     start_goal = data['start_goal']

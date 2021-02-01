@@ -12,106 +12,11 @@ from tqdm import tqdm
 def get_dynamics(dynamics):
     sys_dict = {
         "acrobot_obs": "Acrobot",
-        "cartpole_obs": "CartPole",
+        # "cartpole_obs": "CartPole",
         "quadrotor_obs": "QuadrotorVec"
     }
     return eval("sys_dict[dynamics]()")
 
-
-
-def get_obs_states(env_id, system='cartpole_obs',):
-    if system == 'cartpole_obs':
-        def line_line_cc(x1, y1, x2, y2, x3, y3, x4, y4):
-            uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
-            uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
-            if uA >= 0. and uA <= 1. and uB >= 0. and uB <= 1.:
-                # intersection
-                return True
-            # collision free
-            return False
-        def IsInCollision(x, obc, obc_width=4.):
-            I = 10
-            L = 2.5
-            M = 10
-            m = 5
-            g = 9.8
-            H = 0.5
-
-            STATE_X = 0
-            STATE_V = 1
-            STATE_THETA = 2
-            STATE_W = 3
-            CONTROL_A = 0
-
-            MIN_X = -30
-            MAX_X = 30
-            MIN_V = -40
-            MAX_V = 40
-            MIN_W = -2
-            MAX_W = 2
-
-
-            if x[0] < MIN_X or x[0] > MAX_X:
-                return True
-            H = 0.5
-            pole_x1 = x[0]
-            pole_y1 = H
-            pole_x2 = x[0] + L * np.sin(x[2])
-            pole_y2 = H + L * np.cos(x[2])
-
-            width = 4
-            for i in range(len(obc)):
-                for j in range(0, 8, 2):
-                    x1 = obc[i][j]
-                    y1 = obc[i][j+1]
-                    x2 = obc[i][(j+2) % 8]
-                    y2 = obc[i][(j+3) % 8]
-                    if line_line_cc(pole_x1, pole_y1, pole_x2, pole_y2, x1, y1, x2, y2):
-                        return True
-            return False
-        _obs_list = get_obs(system, env_id)[env_id]#.reshape(-1, 2)
-        obs_list = []
-        width = 4
-        for i in range(len(_obs_list)):
-            x = _obs_list[i][0];
-            y = _obs_list[i][1];
-            obs = np.zeros(8)
-            obs[0] = x - width / 2;  obs[1] = y + width / 2;
-            obs[2] = x + width / 2;  obs[3] = y + width / 2;
-            obs[4] = x + width / 2;  obs[5] = y - width / 2;
-            obs[6] = x - width / 2;  obs[7] = y - width / 2;
-            obs_list.append(obs)
-        obs_i = np.array(obs_list)
-        dx = 5
-        dtheta = 0.5
-        # feasible_points = []
-        infeasible_points = []
-        imin = 0
-        imax = int(2*30./dx)
-        jmin = 0
-        jmax = int(2*np.pi/dtheta)
-
-        for i in range(imin, imax):
-            for j in range(jmin, jmax):
-                x = np.array([dx*i-30, 0., dtheta*j-np.pi, 0.])
-                if IsInCollision(x, obs_i):
-                    infeasible_points.append(x)
-                    # pass
-                # else:
-                    # feasible_points.append(x)
-        # feasible_points = np.array(feasible_points)
-        infeasible_points = np.array(infeasible_points)
-        # print('feasible points')
-        # print(feasible_points)
-        # print('infeasible points')
-        # print(infeasible_points)
-
-    elif system == 'acrobot_obs':
-        return None
-    else:
-        raise NotImplementedError("unkown dynamics")        
-
-    return infeasible_points
 
 def interpolate_path(path_dict, system="acrobot_obs", interval_steps=20, step_size=2e-2):
     dynamics = get_dynamics(system)

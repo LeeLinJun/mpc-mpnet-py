@@ -114,7 +114,6 @@ def load_func(net, fname):
 @click.option('--ep', default=10000)
 @click.option('--outputfn', default="mpnet_10k_external_small_model_step_500.pt")
 def main(system_env, system, setup, ep, outputfn):
-
     # mpnet = MPNet(
     #     ae_input_size=32, 
     #     ae_output_size=1024, 

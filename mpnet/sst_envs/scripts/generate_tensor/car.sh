@@ -1,0 +1,2 @@
+# python process_data_cost.py --num 10 --system car_obs --setup d_n_aug_itp --interpolate True --interpolate_steps 100 --goal_aug True
+python process_data_cost.py --num 10 --system car_obs --setup d_n_itp --interpolate True --interpolate_steps 100 --goal_aug False

@@ -4,8 +4,11 @@ import pickle
 import re
 import click
 from systems.acrobot import Acrobot
+from systems.quadrotor import QuadrotorVec
+
 from pathlib import Path
 from tqdm import tqdm
+
 
 def get_dynamics(dynamics):
     sys_dict = {
@@ -18,13 +21,16 @@ def get_dynamics(dynamics):
 def get_obs_states(env_id, system='cartpole_obs',):
     if system == 'cartpole_obs':
         def line_line_cc(x1, y1, x2, y2, x3, y3, x4, y4):
-            uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
-            uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
+            uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / \
+                ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
+            uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / \
+                ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
             if uA >= 0. and uA <= 1. and uB >= 0. and uB <= 1.:
                 # intersection
                 return True
             # collision free
             return False
+
         def IsInCollision(x, obc, obc_width=4.):
             I = 10
             L = 2.5
@@ -46,7 +52,6 @@ def get_obs_states(env_id, system='cartpole_obs',):
             MIN_W = -2
             MAX_W = 2
 
-
             if x[0] < MIN_X or x[0] > MAX_X:
                 return True
             H = 0.5
@@ -65,17 +70,21 @@ def get_obs_states(env_id, system='cartpole_obs',):
                     if line_line_cc(pole_x1, pole_y1, pole_x2, pole_y2, x1, y1, x2, y2):
                         return True
             return False
-        _obs_list = get_obs(system, env_id)[env_id]#.reshape(-1, 2)
+        _obs_list = get_obs(system, env_id)[env_id]  # .reshape(-1, 2)
         obs_list = []
         width = 4
         for i in range(len(_obs_list)):
-            x = _obs_list[i][0];
-            y = _obs_list[i][1];
+            x = _obs_list[i][0]
+            y = _obs_list[i][1]
             obs = np.zeros(8)
-            obs[0] = x - width / 2;  obs[1] = y + width / 2;
-            obs[2] = x + width / 2;  obs[3] = y + width / 2;
-            obs[4] = x + width / 2;  obs[5] = y - width / 2;
-            obs[6] = x - width / 2;  obs[7] = y - width / 2;
+            obs[0] = x - width / 2
+            obs[1] = y + width / 2
+            obs[2] = x + width / 2
+            obs[3] = y + width / 2
+            obs[4] = x + width / 2
+            obs[5] = y - width / 2
+            obs[6] = x - width / 2
+            obs[7] = y - width / 2
             obs_list.append(obs)
         obs_i = np.array(obs_list)
         dx = 5
@@ -105,9 +114,10 @@ def get_obs_states(env_id, system='cartpole_obs',):
     elif system == 'acrobot_obs':
         return None
     else:
-        raise NotImplementedError("unkown dynamics")        
+        raise NotImplementedError("unkown dynamics")
 
     return infeasible_points
+
 
 def interpolate_path(path_dict, system="acrobot_obs", interval_steps=20, step_size=2e-2):
     dynamics = get_dynamics(system)
@@ -120,26 +130,28 @@ def interpolate_path(path_dict, system="acrobot_obs", interval_steps=20, step_si
     costs = [cost]
     for k in range(len(ref_control)):
         max_steps = int(np.round(ref_time[k]/step_size))
-        #print(state, ref_path[k])
+        #  print(state, ref_path[k])
         state = ref_path[k].copy()
         waypoints[-1] = ref_path[k]
         for step in range(1, max_steps+1):
-            state = dynamics.propagate(state.copy(), [ref_control[k]], 1, step_size).copy()
+            state = dynamics.propagate(
+                state.copy(), [ref_control[k]], 1, step_size).copy()
             cost += step_size
             if (step % interval_steps == 0) or (step == max_steps):
                 waypoints.append(state.copy())
                 costs.append(cost)
-                #print(step, state)
+                #  print(step, state)
     waypoints[-1] = ref_path[-1].copy()
-    #print(waypoints[-1], ref_path[-1])
+    #  print(waypoints[-1], ref_path[-1])
     waypoints = np.array(waypoints)
     costs = np.array(costs)
     costs_sofar = costs.copy()
     costs2go = cost - costs
 #     print(costs2go)
 #     print(waypoints.shape, costs2go.shape)
-    #print(waypoints) 
+    # print(waypoints)
     return waypoints, costs_sofar, costs2go
+
 
 def subsample_path(data, gt, c2g, csf, c, transit_pair_data, th=0):
     curr_cost = 0
@@ -161,8 +173,7 @@ def subsample_path(data, gt, c2g, csf, c, transit_pair_data, th=0):
     return [np.array(d) for d in [subs_data, subs_gt, subs_c2g, subs_csf, subs_c, subs_transit_pair_data]]
 
 
-
-def path_to_tensor_forward(env_id, 
+def path_to_tensor_forward(env_id,
                            path_dict,
                            normalize,
                            interpolate=False,
@@ -172,7 +183,7 @@ def path_to_tensor_forward(env_id,
                            infeasible_points=None):
     """
     [env_id, state, goal]
-    """    
+    """
     if interpolate:
         path, costs_sofar, costs2go = interpolate_path(path_dict)
     else:
@@ -198,8 +209,10 @@ def path_to_tensor_forward(env_id,
 #    gt.append(path[0, :])
     for i_start in range(n_nodes-1):
         # data.append(np.concatenate(([env_id], path[i_start, :], path[-1])))
-        data.append(np.concatenate(([env_id], path[i_start, :], start_goal[-1])))
-        transit_pair_data.append(np.concatenate(([env_id], path[i_start, :], path[i_start+1, :])))
+        data.append(np.concatenate(
+            ([env_id], path[i_start, :], start_goal[-1])))
+        transit_pair_data.append(np.concatenate(
+            ([env_id], path[i_start, :], path[i_start+1, :])))
         gt.append(path[i_start+1, :])
         c2g.append(costs2go[i_start])
         csf.append(costs_sofar[i_start])
@@ -211,9 +224,9 @@ def path_to_tensor_forward(env_id,
         #         gt.append(path[i_start+1, :])
     # last path node to goal
     #data.append(np.concatenate(([env_id], path[-1, :], start_goal[-1])))
-    #gt.append(start_goal[-1])
-    #c2g.append(0)
-    
+    # gt.append(start_goal[-1])
+    # c2g.append(0)
+
     '''
     Adding collision states with low resolution to dataset
     '''
@@ -221,13 +234,13 @@ def path_to_tensor_forward(env_id,
         data_with_obs = data.copy()
         c2g_with_obs = c2g.copy()
         for i_infeasible_states in range(infeasible_points.shape[0]):
-            data_with_obs.append(np.concatenate(([env_id], infeasible_points[i_infeasible_states], path[-1])))
+            data_with_obs.append(np.concatenate(
+                ([env_id], infeasible_points[i_infeasible_states], path[-1])))
             c2g_with_obs.append(10)
         data_with_obs = np.array(data_with_obs)
         c2g_with_obs = np.array(c2g_with_obs)
     else:
         data_with_obs, c2g_with_obs = None, None
-    
 
     '''
     Finished adding collision states
@@ -246,39 +259,38 @@ def path_to_tensor_forward(env_id,
     csf = np.array(csf)
     c = np.array(c)
     transit_pair_data = np.array(transit_pair_data)
-            
-    
+
     if normalize:
         if system == "acrobot_obs":
-            data[:, [1,2,5,6]] /= np.pi
-            data[:, [3,4,7,8]] /= 6
-            gt[:, [0,1]] /= np.pi
-            gt[:, [2,3]] /= 6
+            data[:, [1, 2, 5, 6]] /= np.pi
+            data[:, [3, 4, 7, 8]] /= 6
+            gt[:, [0, 1]] /= np.pi
+            gt[:, [2, 3]] /= 6
         elif system == "cartpole_obs":
             data[:, 1:] /= np.array([30, 40, np.pi, 2, 30, 40, np.pi, 2])
             gt /= np.array([30, 40, np.pi, 2])
             if infeasible_points is not None:
-                data_with_obs[:, 1:] /= np.array([30, 40, np.pi, 2, 30, 40, np.pi, 2])
+                data_with_obs[:,
+                              1:] /= np.array([30, 40, np.pi, 2, 30, 40, np.pi, 2])
         elif system == 'quadrotor_obs':
-            data[:, 1:] /= np.array([# start
-                                     5, 5, 5,
-                                     1, 1, 1, 1,
-                                     1, 1, 1,
-                                     1, 1, 1,
-                                     # goal
-                                     5, 5, 5,
-                                     1, 1, 1, 1,
-                                     1, 1, 1,
-                                     1, 1, 1])
+            data[:, 1:] /= np.array([  # start
+                5, 5, 5,
+                1, 1, 1, 1,
+                1, 1, 1,
+                1, 1, 1,
+                # goal
+                5, 5, 5,
+                1, 1, 1, 1,
+                1, 1, 1,
+                1, 1, 1])
             gt /= np.array([5, 5, 5,
                             1, 1, 1, 1,
                             1, 1, 1,
                             1, 1, 1])
         else:
             raise NotImplementedError("unkown dynamics")
-    
-    return data, gt, c2g, csf, c, transit_pair_data, data_with_obs, c2g_with_obs
 
+    return data, gt, c2g, csf, c, transit_pair_data, data_with_obs, c2g_with_obs
 
 
 @click.command()
@@ -296,11 +308,11 @@ def main(num, system, traj_num, setup, normalize, interpolate, subsample_th, goa
     data_with_obs, c2g_with_obs = [], []
     for env_id in range(num):
 
-        infeasible_points = get_obs_states(env_id = env_id, system=system)
+        infeasible_points = get_obs_states(env_id=env_id, system=system)
         for traj_id in tqdm(range(traj_num)):
             # try:
             path_dict = load_data(system, env_id, traj_id)
-            data_lists = path_to_tensor_forward(env_id, 
+            data_lists = path_to_tensor_forward(env_id,
                                                 path_dict,
                                                 normalize,
                                                 interpolate=interpolate,
@@ -316,9 +328,9 @@ def main(num, system, traj_num, setup, normalize, interpolate, subsample_th, goa
             cost.append(c)
             transit_pair_data.append(tp_d)
             data_with_obs.append(d_obs)
-            c2g_with_obs.append(c2g_obs) 
+            c2g_with_obs.append(c2g_obs)
             # if traj_id % 50 == 0:
-                # print(env_id, traj_id)
+            # print(env_id, traj_id)
         # infeasible_points = get_obs_states(env_id = env_id, system=system)
         # print(infeasible_points.shape)
     data = np.concatenate(data, axis=0)
@@ -330,7 +342,8 @@ def main(num, system, traj_num, setup, normalize, interpolate, subsample_th, goa
     data_with_obs = np.concatenate(data_with_obs, axis=0)
     c2g_with_obs = np.concatenate(c2g_with_obs, axis=0)
 
-    print([d.shape for d in [data, gt, cost_to_go, cost_so_far, transit_pair_data, data_with_obs, c2g_with_obs]])
+    print([d.shape for d in [data, gt, cost_to_go, cost_so_far,
+                             transit_pair_data, data_with_obs, c2g_with_obs]])
 
     Path("data/{}".format(setup)).mkdir(parents=True, exist_ok=True)
     np.save('data/{}/{}_path_data.npy'.format(setup, system), data)
@@ -338,11 +351,11 @@ def main(num, system, traj_num, setup, normalize, interpolate, subsample_th, goa
     np.save('data/{}/{}_cost_to_go.npy'.format(setup, system), cost_to_go)
     np.save('data/{}/{}_cost_so_far.npy'.format(setup, system), cost_so_far)
     np.save('data/{}/{}_cost.npy'.format(setup, system), cost)
-    np.save('data/{}/{}_transit_pair_data.npy'.format(setup, system), transit_pair_data)
+    np.save('data/{}/{}_transit_pair_data.npy'.format(setup, system),
+            transit_pair_data)
 
     np.save('data/{}/{}_data_with_obs.npy'.format(setup, system), data_with_obs)
     np.save('data/{}/{}_c2g_with_obs.npy'.format(setup, system), c2g_with_obs)
-
 
 
 if __name__ == '__main__':

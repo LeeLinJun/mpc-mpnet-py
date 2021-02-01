@@ -11,8 +11,8 @@ from time import sleep
 import shutil
 import fcntl
 
-def env_fn(env, model="quadrotor_obs"):
-    return "./trajectories/{model}/{env}/env{env}.pkl".format(model=model, env=env)
+def env_fn(env, model="quadrotor_obs", generalize=False):
+    return "./trajectories/{model}_generalize/{env}/env{env}.pkl".format(model=model, env=env) if generalize else "./trajectories/{model}/{env}/env{env}.pkl".format(model=model, env=env)
 
 def load_occ_table(env, table=set(), model="quadrotor_obs"):
     file_name = env_fn(env)

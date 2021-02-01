@@ -11,9 +11,9 @@ from sparse_rrt.systems import standard_cpp_systems
 def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=None):
     print("env {}, traj {}".format(env_id, traj_id))
     if system in ['cartpole_obs', 'acrobot_obs', 'car_obs']:
-        obs_list = get_obs(system, env_id)[env_id]
+        obs_list = get_obs(system)[env_id]
     elif system in ['quadrotor_obs']:
-        obs_list = get_obs_3d(system, env_id)[env_id].reshape(-1, 3)
+        obs_list = get_obs_3d(system)[env_id].reshape(-1, 3)
     data = load_data(system, env_id, traj_id)
     ref_path = data['path']
     ref_cost = data['cost'].sum()

@@ -1,8 +1,11 @@
 from .voxel_encoder import VoxelEncoder
-from .pnet_shallow import PNet
+# from .pnet_shallow import PNet
+from .pnet_res import PNet
+
 
 import torch
 from torch import nn
+
 
 class MPNet(nn.Module):
     def __init__(self, ae_input_size=32, ae_output_size=64,
@@ -15,12 +18,11 @@ class MPNet(nn.Module):
                                     in_channels=in_channels)
         self.pnet = PNet(input_size=ae_output_size+state_size * 2,
                          output_size=state_size+control_size)
-    
+
     def forward(self, x, obs):
         if obs is not None:
             z = self.encoder(obs)
-            z_x = torch.cat((z,x), 1)
+            z_x = torch.cat((z, x), 1)
         else:
             z_x = x
         return self.pnet(z_x)
-
