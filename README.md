@@ -1,13 +1,41 @@
 # MPC-MPNet
-Implementation of Model Predictive Motion Planning Network ([MPC-MPNet](https://sites.google.com/view/mpc-mpnet))
+Implementation of Model Predictive Motion Planning Network 
 
-Model Predictive Motion Planning Network ([MPC-MPNet](https://sites.google.com/view/mpc-mpnet)) is a neural network-based kinodynamic planning algorithm capable of solving Kinodynamic Motion Planning tasks in seconds  with less variability and comparable path quality against a state-of-the-art algorithm that takes minutes to generate solutions with high variability.
-
-MPC-MPNet framework could be adapted to the following two different algorithms:
+[Website](https://sites.google.com/view/mpc-mpnet) | [Paper](https://arxiv.org/abs/2101.06798)
 
 ## MPC-MPNet-Path
 ![MPC-MPNet-Path](assets/path.png)
-
-
 ## MPC-MPNet-Tree
 ![MPC-MPNet-Tree](assets/tree.png)
+
+## Instructions
+### Data generation
+The **data_gen** folder contains code and scripts for four envrionments: acrobot, cart-pole, car and quadrotor.
+```bash
+cd data_gen
+# For parallelization, run the script in i different process:
+bash datagen_${system}_batch${i}.sh
+```
+### Model Training
+Preprocess obstacles and state-goal paris with **process_data.py**, **process_obs.py** in **mpnet/sst_envs**
+Train the network with **mpnet/train_mpnet.py**.
+
+For costnet in MPC-MPNet-Path, use **mpnet/train_costs.py** 
+### Benchmarking
+Editing parmas in **params** folder and run with script
+```bash
+# example: bash scripts/acrobot_obs/mp_tree.sh
+bash scripts/${system}/${method}.sh
+```
+
+
+## Citation
+If you find this open source release useful, please reference in your paper:
+```bibtex
+@misc{2101.06798,
+Author = {Linjun Li and Yinglong Miao and Ahmed H. Qureshi and Michael C. Yip},
+Title = {MPC-MPNet: Model-Predictive Motion Planning Networks for Fast, Near-Optimal Planning under Kinodynamic Constraints},
+Year = {2021},
+Eprint = {arXiv:2101.06798},
+}
+```
