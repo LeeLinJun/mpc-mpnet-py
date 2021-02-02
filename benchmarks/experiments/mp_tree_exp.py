@@ -44,7 +44,7 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
                                                 cost_to_go_predictor_weight_path=params[
                                                     'cost_to_go_predictor_weight_path'],
                                                 num_sample=params['cost_samples'],
-                                                shm_max_step=params['shm_max_steps'],
+                                                # shm_max_step=params['shm_max_steps'],
                                                 np=params['n_problem'], ns=params['n_sample'], nt=params[
                                                     'n_t'], ne=params['n_elite'], max_it=params['max_it'],
                                                 converge_r=params['converge_r'], mu_u=params[

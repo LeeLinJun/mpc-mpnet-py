@@ -64,7 +64,7 @@ def experiment(env_id, traj_id, verbose=False, system='cartpole_obs', params=Non
         'traj_id': traj_id,
         'planning_time': toc-tic,
         'successful': True,
-        'costs': costs if solution is not None else ref_cost
+        'costs': costs
     }
 
     print("\t{}, time: {} seconds, {}(ref:{}) costs".format(
