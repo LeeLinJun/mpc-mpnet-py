@@ -25,6 +25,13 @@ def main(system_env, system, setup, ep, from_exported, network_type, outputfn):
     else:
         if system == 'quadrotor_obs':
             from networks.mpnet_quadrotor_obs import MPNet
+        elif system == 'cartpole_obs':
+            from networks.mpnet_cartpole_obs import MPNet
+        elif system == 'acrobot_obs':
+            from networks.mpnet_acrobot_obs import MPNet
+        elif system == 'car_obs':
+            from networks.mpnet_car_obs import MPNet
+
 
         mpnet = MPNet(
             ae_input_size=32, 
@@ -35,6 +42,8 @@ def main(system_env, system, setup, ep, from_exported, network_type, outputfn):
     
     costnet.load_state_dict(torch.load('output/{}/{}/{}/ep{}.pth'.format(system, setup, network_type, ep)))
     costnet.eval()
+    # costnet.mlp.eval()
+    # costnet.mlp.dropout = False
     Path("exported/output/{}".format(system)).mkdir(exist_ok=True)
 
     export(costnet, setup=setup, system_env=system_env, system=system, exported_path="exported/output/{}/{}".format(system, outputfn))

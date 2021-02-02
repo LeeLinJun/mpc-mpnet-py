@@ -1,9 +1,7 @@
 from dataset.dataset import get_loader
-import importlib
-
-import torch
-
-import numpy as np
+# import importlib
+# import torch
+# import numpy as np
 import click
 
 from training_utils.trainer import train_network
@@ -21,8 +19,8 @@ from training_utils.trainer import train_network
 @click.option('--lr_step_size', default=100)
 @click.option('--aug', default=False)
 @click.option('--network_name', default="mpnet")
-def main(ae_output_size, state_size, lr, epochs, batch, 
-    system_env, system, setup, loss_type, lr_step_size, aug, network_name):
+def main(ae_output_size, state_size, lr, epochs, batch,
+         system_env, system, setup, loss_type, lr_step_size, aug, network_name):
     # mpnet_module = importlib.import_module('.mpnet_{}'.format(system), package=".networks")
     try:
         if system == 'cartpole_obs':
@@ -45,9 +43,7 @@ def main(ae_output_size, state_size, lr, epochs, batch,
             from networks.mpnet_car_obs import MPNet
             state_dim = 3
             in_channels = 1
-
-
-    except:
+    except ModuleNotFoundError:
         print("Unrecognized model name")
         raise
 
@@ -56,10 +52,11 @@ def main(ae_output_size, state_size, lr, epochs, batch,
     data_loaders = get_loader(system_env, system, batch_size=batch, setup=setup)
 
     train_network(network=mpnet, data_loaders=data_loaders, network_name=network_name,
-        lr=lr, epochs=epochs, batch=batch, 
-        system_env=system_env, system=system, setup=setup,
-        using_step_lr=True, step_size=lr_step_size, gamma=0.9,
-        loss_type=loss_type, weight_save_epochs=25, aug=aug)
+                  lr=lr, epochs=epochs, batch=batch,
+                  system_env=system_env, system=system, setup=setup,
+                  using_step_lr=True, step_size=lr_step_size, gamma=0.9,
+                  loss_type=loss_type, weight_save_epochs=25, aug=aug)
+
 
 if __name__ == '__main__':
     main()

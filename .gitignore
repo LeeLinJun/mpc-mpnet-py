@@ -17,3 +17,6 @@ data_gen/trajectories
 
 mpnet/exported
 mpc-mpnet.code-workspace
+
+results.bk
+params.bk
