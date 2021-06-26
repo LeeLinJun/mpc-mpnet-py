@@ -9,6 +9,9 @@ Implementation of Model Predictive Motion Planning Network
 ![MPC-MPNet-Tree](assets/tree.png)
 
 ## Instructions
+### Compile Modules
+cd into **deps/** and build cpp modules based on sparse-rrt python binding
+
 ### Data generation
 The **data_gen** folder contains code and scripts for four envrionments: acrobot, cart-pole, car and quadrotor.
 ```bash
